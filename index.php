@@ -94,7 +94,7 @@
         <nav>
             <ul>
                 <li><a href="">Login</a></li>
-                <li><a href="">Signup</a></li>
+                <li><a href="register.php">Signup</a></li>
                 <li><a href="">Dashboard</a></li>
             </ul>
         </nav>
