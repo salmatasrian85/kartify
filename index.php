@@ -90,7 +90,7 @@
 </head>
 <body>
     <header class="header">
-        <a href="index.php">shop</a>
+        <a href="index.php">Kartify</a>
         <nav>
             <ul>
                 <li><a href="">Login</a></li>
