@@ -1,0 +1,48 @@
+<?php
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .login{
+            position: fixed;
+            top: 25%;
+            left:35%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: darkgray;
+            padding: 30px;
+        }
+        .login input{
+            display: block;
+            border-radius: 15px 50px;
+            border: 2px solid darkblue;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        .login a{
+            color: rebeccapurple;
+        }
+        .button{
+            border: 2px solid darkblue;
+            background-color: darkmagenta;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="login">
+        <form action="login.php" method="post"> 
+        <input type="email" name="email" placeholder="Enter your Name here!" required>
+        <input type="password" name="password" placeholder="Enter Your Password here!" required>
+        <input type="submit" name="submit" value="login" >
+        <p>Don't register yet!<a href="register.php"> Sign Up</a></p>
+    </form>
+    </div>
+</body>
+</html>
