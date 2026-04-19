@@ -1,4 +1,9 @@
 <?php
+include "db.php"
+    if(isset($_POST['submit'])){
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,7 +35,7 @@
         }
         .button{
             border: 2px solid darkblue;
-            background-color: darkmagenta;
+            background-color: lightseagreen;
             width: 100%;
         }
     </style>
@@ -40,7 +45,7 @@
         <form action="login.php" method="post"> 
         <input type="email" name="email" placeholder="Enter your Name here!" required>
         <input type="password" name="password" placeholder="Enter Your Password here!" required>
-        <input type="submit" name="submit" value="login" >
+        <input class="button" type="submit" name="submit" value="login" >
         <p>Don't register yet!<a href="register.php"> Sign Up</a></p>
     </form>
     </div>
