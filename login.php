@@ -1,9 +1,33 @@
 <?php
-include "db.php"
+include "db.php";
+session_start();
     if(isset($_POST['submit'])){
         $email = $_POST['email'];
         $password = $_POST['password'];
-    }
+
+        $sql = "select * from users where email = '$email'";
+        $result = mysqli_query($conn,$sql);
+     if(!$result->num_rows>0){
+          $row =  mysqli_fetch_assoc($result);
+            if ($row['password'] ==$password){
+            $SESSION['user_id'] = $row['id'];
+            $SESSION['user_name'] = $row['name'];
+            $SESSION['user_role'] = $row['role'];
+            if($SESSION['user_role'] == "admin"){
+                header("Location: admin/dashboard.php");
+            }
+            else{
+            echo "Dashboard for user";
+            }
+        }
+           else{
+            echo "Wrong Password!";
+           }
+        }
+        else{
+            echo "Please go for signup!";
+        }
+    }   
 ?>
 <!DOCTYPE html>
 <html lang="en">
