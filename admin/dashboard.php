@@ -55,7 +55,7 @@ if(isset($_SESSION['user_id'])) {
     <ul>
         <li><a href="">Add Product</a></li>
         <li><a href="">View Order</a></li>
-        <li><a href="">Logout</a></li>
+        <li><a href="../logout.php">Logout</a></li>
     </ul>
     </div>
     <div class="dashboard_main">
