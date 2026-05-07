@@ -1,16 +1,50 @@
 <?php
 session_start(); 
-if(isset($_SESSION['user_id'])) {
+include "../db.php";
+
+if(isset($_SESSION['user_id'])){
+    $sql1 = "select * from categories";
+    $result1 = mysqli_query($conn,$sql1);
+
     if($_SESSION['user_role'] == "admin"){
 
+        // SUBMIT BUTTON CLICK HANDLER
+        if(isset($_POST['submit'])){
+
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+            $price = $_POST['price'];
+            $stock = $_POST['stock'];
+            $category_name = $_POST['category_name'];
+
+            // IMAGE UPLOAD
+            $image = $_FILES['image']['name'];
+            $tmp_location = $_FILES['image']['tmp_name'];
+
+            $upload_location= "../image/";
+
+            $sql = "insert into products 
+                (name, description, price, stock, image, category_name)
+                values
+                ('$name', '$description', '$price', '$stock', '$image', '$category_name')";
+
+            $result = mysqli_query($conn, $sql);
+
+            if(!$result){
+                echo "Error!: {$conn->error}";
+            }else{
+                echo "Product added successfully!";
+                move_uploaded_file($tmp_location,$upload_location.$image);
+            }
+        }
     }else{
         echo "go for user dashboard";
     }
+
 }else{
     header("Location: ../index.php");
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -93,16 +127,19 @@ if(isset($_SESSION['user_id'])) {
     <div class="dashboard_main">
         <form action="addproduct.php" method="post"
         enctype="multipart/form-data">
-            <input type="text" name="name" placeholder="Enter Product Name here!">
-            <textarea name="description" placeholder="Enter product description here!" rows="4"></textarea>
+            <input type="text" name="name" placeholder="Enter Product Name here!" required>
+            <textarea name="description" placeholder="Enter product description here!" rows="4" ></textarea>
             <input type="number" name="price" placeholder="Enter price here!" >
             <input type="number" name="stock" placeholder="Enter stock number here!">
             <input type="file" name="image" >
-            <select name="category_id">
-            <option value="">Select Category ID</option>
-            </select>
-            <select name="category_name">
-            <option value="">Select Category Name</option>
+             <select name="category_name" required>
+                <option value="">Select Category</option>
+
+                <?php while($row = mysqli_fetch_assoc($result1)){ ?>
+                    <option value="<?php echo $row['name']; ?>">
+                        <?php echo $row['name']; ?>
+                    </option>
+                <?php } ?>
             </select>
             <input class="button" type="submit" name="submit" value="Add Product">
         </form>
