@@ -22,14 +22,43 @@ if(isset($_SESSION['user_id'])){
     header("Location: ../index.php");
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Product Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
     <style>
-        body {
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard_sidebar{
+            position: fixed;
+            top: 0;
+            background-color: darkcyan;
+            width: 200px;
+            height: 100%;
+        }
+        .dashboard_sidebar ul li{
+            list-style: none;
+            text-align: center;
+            
+        }
+        .dashboard_sidebar ul li a{
+            display: block;
+            text-decoration: none;
+            color: white;
+            padding: 10px;
+        }
+       .dashboard_sidebar ul li a:hover{
+        background-color: black;
+       }
+       .dashboard_main{
+        padding: 30px;
+        margin-left: 200px;
+       }
+       body {
             margin: 0;
             font-family: Arial, sans-serif;
         }
@@ -89,7 +118,6 @@ if(isset($_SESSION['user_id'])){
             width: 120px;
             border-radius: 8px;
         }
-
         /* Buttons */
         button {
             padding: 8px 12px;
@@ -108,21 +136,20 @@ if(isset($_SESSION['user_id'])){
     </style>
 </head>
 <body>
-
-<div class="container">
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h3>Add Product</h3>
-        <p>View Order</p>
-        <p>Logout</p>
+    <div class="dashboard_sidebar">
+    <ul>
+        <li><a href="addproduct.php">Add Product</a></li>
+        <li><a href="displayproduct.php">View Order</a></li>
+        <li><a href="../logout.php">Logout</a></li>
+    </ul>
     </div>
+    <div class="dashboard_main">
 
     <!-- Main Content -->
     <div class="content">
         <table>
             <thead>
-                <tr>
+                <tr class="theadrow">
                     <th>Product Title</th>
                     <th>Product Description</th>
                     <th>Price</th>
@@ -152,8 +179,7 @@ if(isset($_SESSION['user_id'])){
             </tbody>
         </table>
     </div>
-
 </div>
-
+    </div>
 </body>
 </html>

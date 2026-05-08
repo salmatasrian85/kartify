@@ -120,7 +120,7 @@ if(isset($_SESSION['user_id'])){
     <div class="dashboard_sidebar">
     <ul>
         <li><a href="addproduct.php">Add Product</a></li>
-        <li><a href="">View Order</a></li>
+        <li><a href="displayproduct.php">View Order</a></li>
         <li><a href="../logout.php">Logout</a></li>
     </ul>
     </div>
