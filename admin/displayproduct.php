@@ -2,10 +2,10 @@
 session_start(); 
 include "../db.php";
 
-if(isset($_SESSION['user_id'])){
-    $sql = "select * from products";
-    $result = mysqli_query($conn,$sql);
+$sql = "select * from products";
+$result = mysqli_query($conn,$sql);
 
+if(isset($_SESSION['user_id'])){ 
     if($_SESSION['user_role'] == "admin"){
             $result = mysqli_query($conn, $sql);
 
