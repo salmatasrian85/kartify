@@ -2,13 +2,13 @@
 session_start(); 
 include "../db.php";
 
+$sql1 = "select * from categories";
+$result1 = mysqli_query($conn,$sql1);
+
 if(isset($_SESSION['user_id'])){
-    $sql1 = "select * from categories";
-    $result1 = mysqli_query($conn,$sql1);
 
     if($_SESSION['user_role'] == "admin"){
 
-        // SUBMIT BUTTON CLICK HANDLER
         if(isset($_POST['submit'])){
 
             $name = $_POST['name'];
@@ -17,7 +17,6 @@ if(isset($_SESSION['user_id'])){
             $stock = $_POST['stock'];
             $category_name = $_POST['category_name'];
 
-            // IMAGE UPLOAD
             $image = $_FILES['image']['name'];
             $tmp_location = $_FILES['image']['tmp_name'];
 
@@ -43,6 +42,7 @@ if(isset($_SESSION['user_id'])){
 
 }else{
     header("Location: ../index.php");
+    exit();
 }
 ?>
 
@@ -134,7 +134,6 @@ if(isset($_SESSION['user_id'])){
             <input type="file" name="image" >
              <select name="category_name" required>
                 <option value="">Select Category</option>
-
                 <?php while($row = mysqli_fetch_assoc($result1)){ ?>
                     <option value="<?php echo $row['name']; ?>">
                         <?php echo $row['name']; ?>

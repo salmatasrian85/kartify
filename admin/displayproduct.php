@@ -163,6 +163,7 @@ if(isset($_SESSION['user_id'])){
 
             <tbody>
                 <?php while($row=mysqli_fetch_assoc($result)){
+
                 ?>
                 <tr>
                     <td><?php echo $row['name'] ?></td>
@@ -172,13 +173,12 @@ if(isset($_SESSION['user_id'])){
                     <td><img src="../image/<?php echo $row['image']?>" alt=""></td>
                     <td><?php echo $row['category_name']?></td>
                     <td><a class="update" href="">Update</a></td>
-                    <td><a class ="delete" href="">Delete</a></td>
+                    <td><a class ="delete" href="deleteproduct.php?product_id=<?php echo $row['id'] ?>">Delete</a></td>
                 </tr>
                 <?php } ?> 
             </tbody>
         </table>
     </div>
 </div>
-    </div>
 </body>
 </html>
