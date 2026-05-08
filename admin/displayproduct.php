@@ -149,7 +149,7 @@ if(isset($_SESSION['user_id'])){
     <div class="content">
         <table>
             <thead>
-                <tr class="theadrow">
+                <tr>
                     <th>Product Title</th>
                     <th>Product Description</th>
                     <th>Price</th>
@@ -163,7 +163,6 @@ if(isset($_SESSION['user_id'])){
 
             <tbody>
                 <?php while($row=mysqli_fetch_assoc($result)){
-
                 ?>
                 <tr>
                     <td><?php echo $row['name'] ?></td>
@@ -172,8 +171,8 @@ if(isset($_SESSION['user_id'])){
                     <td><?php echo $row['stock']?></td>
                     <td><img src="../image/<?php echo $row['image']?>" alt=""></td>
                     <td><?php echo $row['category_name']?></td>
-                    <td><a href="update">Update</a></td>
-                    <td><a href="delete">Delete</a></td>
+                    <td><a class="update" href="">Update</a></td>
+                    <td><a class ="delete" href="">Delete</a></td>
                 </tr>
                 <?php } ?> 
             </tbody>
