@@ -172,7 +172,7 @@ if(isset($_SESSION['user_id'])){
                     <td><?php echo $row['stock']?></td>
                     <td><img src="../image/<?php echo $row['image']?>" alt=""></td>
                     <td><?php echo $row['category_name']?></td>
-                    <td><a class="update" href="">Update</a></td>
+                    <td><a class="update" href="updateproduct.php?product_id=<?php echo $row['id'] ?>">Update</a></td>
                     <td><a class ="delete" href="deleteproduct.php?product_id=<?php echo $row['id'] ?>">Delete</a></td>
                 </tr>
                 <?php } ?> 
