@@ -4,7 +4,7 @@ if(isset($_SESSION['user_id'])) {
     if($_SESSION['user_role'] == "admin"){
 
     }else{
-        echo "go for user dashboard";
+       header("Location: ../dashboard.php");
     }
 }else{
     header("Location: ../index.php");

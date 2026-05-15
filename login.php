@@ -20,7 +20,8 @@ if(isset($_POST['submit'])){
             if($_SESSION['user_role'] == "admin"){
                 header("Location: admin/dashboard.php");
             } else {
-                echo "Dashboard for user";
+                header("Location:index.php");
+                exit();
             }
         } else {
             echo "Wrong Password!";
