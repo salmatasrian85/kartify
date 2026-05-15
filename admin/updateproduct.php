@@ -2,12 +2,19 @@
 session_start(); 
 include "../db.php";
 
-$sql1 = "select * from categories";
-$result1 = mysqli_query($conn,$sql1);
-
 if(isset($_SESSION['user_id'])){
     if($_SESSION['user_role'] == "admin"){
+        $sql1 = "select * from categories";
+        $result1 = mysqli_query($conn,$sql1);
+        if(isset($_GET['product_id'])){
+            $product_id = $_GET['product_id'];
+            $sql2 = "select * from products where id ='$product_id'";
+            $result2 = mysqli_query($conn,$sql2);
+            $row2 = mysqli_fetch_assoc($result2);
+            }
+       
         if(isset($_POST['submit'])){
+
             $name = $_POST['name'];
             $description = $_POST['description'];
             $price = $_POST['price'];
@@ -116,20 +123,23 @@ if(isset($_SESSION['user_id'])){
 <body>
     <div class="dashboard_sidebar">
     <ul>
-        <li><a href="addproduct.php">Add Product</a></li>
+        <li><a href="updateproduct.php">Add Product</a></li>
         <li><a href="displayproduct.php">View Order</a></li>
         <li><a href="../logout.php">Logout</a></li>
     </ul>
     </div>
     <div class="dashboard_main">
-        <form action="addproduct.php" method="post"
-        enctype="multipart/form-data">
-            <input type="text" name="name" placeholder="Enter Product Name here!" required>
-            <textarea name="description" placeholder="Enter product description here!" rows="4" ></textarea>
-            <input type="number" name="price" placeholder="Enter price here!" >
-            <input type="number" name="stock" placeholder="Enter stock number here!">
+        <form action="updateproduct.php?product_id=<?php echo $product_id; ?>" method="post" enctype="multipart/form-data">
+            <input type="text" name="name" value="<?php echo $row2['name']; ?>">
+            <textarea name="description" >
+            <?php echo $row2['description']; ?>
+            </textarea>
+            <input type="number" name="price" value="<?php echo $row2['price']; ?>" >
+            <input type="number" name="stock" value="<?php echo $row2['stock']; ?>">
+            <img src="../image/<?php echo $row2['name']; ?>" width="100">
             <input type="file" name="image" >
-             <select name="category_name" required>
+             <select name="category_name">
+                <h1>Category name is:<?php echo $row2['category_name']; ?></h1>
                 <option value="">Select Category</option>
                 <?php while($row = mysqli_fetch_assoc($result1)){ ?>
                     <option value="<?php echo $row['name']; ?>">
@@ -137,7 +147,7 @@ if(isset($_SESSION['user_id'])){
                     </option>
                 <?php } ?>
             </select>
-            <input class="button" type="submit" name="submit" value="Add Product">
+            <input class="button" type="submit" name="submit" value="Update Product">
         </form>
     </div>
 </body>

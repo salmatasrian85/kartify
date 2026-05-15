@@ -2,10 +2,10 @@
 session_start(); 
 include "../db.php";
 
-$sql1 = "select * from categories";
-$result1 = mysqli_query($conn,$sql1);
 
 if(isset($_SESSION['user_id'])){
+    $sql1 = "select * from categories";
+    $result1 = mysqli_query($conn,$sql1);
 
     if($_SESSION['user_role'] == "admin"){
 
