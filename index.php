@@ -1,16 +1,14 @@
-<?php
+<?php 
 session_start();
 include "db.php";
 
-/* ALL PRODUCTS BY DEFAULT */
+/* ALL PRODUCTS */
 $sql_product_category = "SELECT * FROM products";
 
-/* IF CATEGORY CLICKED */
+/* CATEGORY FILTER */
 if(isset($_GET['category_name']) && $_GET['category_name'] != ""){
     $category_name = mysqli_real_escape_string($conn, $_GET['category_name']);
-
-    $sql_product_category = "SELECT * FROM products 
-    WHERE category_name = '$category_name'";
+    $sql_product_category = "SELECT * FROM products WHERE category_name = '$category_name'";
 }
 
 $result_product_category = mysqli_query($conn, $sql_product_category);
@@ -23,155 +21,177 @@ $result_category = mysqli_query($conn, $sql_category);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Art Gallery</title>
 
-    <style>
-        *{
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
-        .header{
-            position:fixed;
-            top: 0;
-            width: 100%;
-            background-color: gray;
-            display:flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 30px;
-        }
+<style>
 
-        .header ui li{
-            list-style: none;
-        }
+/* ===== BASE ===== */
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #fbfaf8;
+  color: #1a1a1a;
+}
 
-        .header a{
-            text-decoration:none;
-            color: white;
-        }
+:root {
+  --cream: #fbfaf8;
+  --ink: #1a1a1a;
+  --gold: #c5a059;
+}
 
-        .header li{
-            display: inline-block;
-            margin: 5px;
-            margin-right: 50px;
-        }
+/* ===== NAVBAR ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 60px;
+  align-items: center;
+}
 
-        .main{
-            margin-top: 100px;
-            display: flex;
-            justify-content:center;
-            flex-wrap: wrap;
-            margin-bottom:90px;
-        }
+.logo {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  font-weight: 700;
+}
 
-        .product{
-            border:2px solid blueviolet;
-            margin: 10px;
-            max-width: 300px;
-            padding: 30px;
-            text-align: center;
-        }
+nav a {
+  margin-left: 20px;
+  text-decoration: none;
+  color: var(--ink);
+}
 
-        .product a{
-            display: block;
-            text-decoration: none;
-            color: black;
-            background-color: greenyellow;
-            padding: 10px;
-            margin-top: 10px;
-            width: 100%;
-        }
+nav a:hover {
+  color: var(--gold);
+}
 
-        .product img{
-            width: 150px;
-        }
+/* ===== HERO ===== */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+}
 
-        .productPrice{
-            opacity: 70%;
-        }
+.hero h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 42px;
+  font-style: italic;
+  margin-bottom: 10px;
+}
 
-        .footer{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color:gray;
-            position: fixed;
-            bottom: 0;
-            padding: 20px;
-            width:100%;
-        }
+.hero p {
+  max-width: 600px;
+  margin: auto;
+  color: #555;
+  font-size: 16px;
+}
+/* ===== GALLERY ===== */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 280px));
+  justify-content: center;   /* 🔥 CENTER ITEMS */
+  gap: 30px;
+  padding: 40px 60px;
+}
 
-        .footer p{
-            text-align: center;
-        }
+/* ===== CARD ===== */
+.card {
+  position: relative;
+  height: 280px;   /* 🔽 slightly smaller */
+  width: 100%;
+  max-width: 280px; /* 🔥 prevents oversize */
+  border-radius: 12px;
+  overflow: hidden;
+}
 
-        @media(max-width: 400px){
-            .header{
-                display: flex;
-                flex-direction: column;
-            }
+/* 🔥 REAL IMAGE */
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: 0.4s;
+}
 
-            .footer{
-                display: flex;
-                flex-direction: row;
-            }
-        }
-    </style>
+/* overlay */
+.overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(26,26,26,0.8), transparent);
+  color: white;
+}
+
+.overlay h3 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+}
+
+/* hover */
+.card:hover img {
+  transform: scale(1.1);
+}
+
+</style>
 </head>
 
 <body>
 
-<header class="header">
+<!-- ===== NAVBAR ===== -->
+<header class="navbar">
+  <div class="logo">kARTify</div>
 
-    <a href="index.php">Kartify</a>
+  <!-- CATEGORY -->
+  <nav>
+    <a href="index.php">All</a>
+    <?php while($row_category = mysqli_fetch_assoc($result_category)){ ?>
+      <a href="index.php?category_name=<?php echo $row_category['name']; ?>">
+        <?php echo $row_category['name']; ?>
+      </a>
+    <?php } ?>
+  </nav>
 
-    <ul>
-        <?php while($row_category = mysqli_fetch_assoc($result_category)){ ?>
-            <li>
-                <!-- ✅ FIXED LINK -->
-                <a href="index.php?category_name=<?php echo $row_category['name']; ?>">
-                    <?php echo $row_category['name']; ?>
-                </a>
-            </li>
-        <?php } ?>
-    </ul>
-
-    <nav>
-        <ul>
-            <?php if(!isset($_SESSION['user_id'])){ ?>
-                <li><a href="login.php">Login</a></li>
-                <li><a href="register.php">Signup</a></li>
-            <?php } ?>
-            <li><a href="">Dashboard</a></li>
-        </ul>
-    </nav>
-
+  <!-- AUTH -->
+  <nav>
+    <?php if(!isset($_SESSION['user_id'])){ ?>
+      <a href="login.php">Login</a>
+      <a href="register.php">Signup</a>
+    <?php } ?>
+    <a href="#">Dashboard</a>
+  </nav>
 </header>
 
-<main class="main">
+<!-- ===== HERO ===== -->
+<section class="hero">
 
-    <?php while($row_product_category = mysqli_fetch_assoc($result_product_category)){ ?>
+  <h1>Where Vision Meets Reality.</h1>
 
-        <div class="product">
-            <img src="image/<?php echo $row_product_category['image']; ?>" alt="productimg">
-            <h2><?php echo $row_product_category['name']; ?></h2>
-            <p><?php echo $row_product_category['description']; ?></p>
-            <p><?php echo $row_product_category['stock']; ?></p>
-            <p class="productPrice"><?php echo $row_product_category['price']; ?></p>
-            <a href="#">Buy Now</a>
-        </div>
+  <p>
+    Explore our curated collection of contemporary masterworks, 
+    hand-selected to elevate your environment and inspire your soul.
+  </p>
 
-    <?php } ?>
+</section>
+<!-- ===== PRODUCTS (GALLERY STYLE) ===== -->
+<section class="gallery">
 
-</main>
+<?php while($row = mysqli_fetch_assoc($result_product_category)){ ?>
 
-<footer class="footer">
-    <p>copyright @Tasrian</p>
-</footer>
+  <div class="card">
+    
+    <img src="image/<?php echo $row['image']; ?>" alt="">
+
+    <div class="overlay">
+      <h3><?php echo $row['name']; ?></h3>
+      <p><?php echo $row['price']; ?> ৳</p>
+    </div>
+
+  </div>
+
+<?php } ?>
+
+</section>
 
 </body>
 </html>
