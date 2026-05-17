@@ -172,9 +172,11 @@ if(isset($_SESSION['user_id'])){
 <!-- Sidebar -->
 <div class="sidebar">
     <ul>
-        <li><a href="addproduct.php">Add Product</a></li>
-        <li><a href="displayproduct.php">View Product</a></li>
-        <li><a href="../logout.php">Logout</a></li>
+        <a href="dashboard.php">Dashboard</a>
+        <a href="addproduct.php">Add Product</a>
+        <a href="displayproduct.php">Manage Products</a>
+        <a href="vieworder.php">Orders</a>
+        <a href="../logout.php">Logout</a>
     </ul>
 </div>
 

@@ -386,7 +386,6 @@ $result = mysqli_query($conn, $sql);
       cursor: pointer;
       transition: 0.3s;
     }
-
     .newsletter-form button:hover{
       background: white;
     }

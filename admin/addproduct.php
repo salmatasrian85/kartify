@@ -185,7 +185,8 @@ input, textarea, select{
         <div class="logo">KARTIFY</div>
         <a href="dashboard.php">Dashboard</a>
         <a href="addproduct.php">Add Product</a>
-        <a href="displayproduct.php">View Product</a>
+        <a href="displayproduct.php">Manage Products</a>
+        <a href="vieworder.php">Orders</a>
         <a href="../logout.php">Logout</a>
     </div>
 

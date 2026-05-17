@@ -1,25 +1,24 @@
 <?php
-session_start(); 
-include "../db.php";
+session_start();
+include "../db.php"; // FIXED PATH
 
-$sql = "select * from products";
-$result = mysqli_query($conn,$sql);
-
-if(isset($_SESSION['user_id'])){ 
-    if($_SESSION['user_role'] == "admin"){
-
-        if(!$result){
-            echo "Error!: {$conn->error}";
-        }
-
-    }else{
-        echo "go for user dashboard";
-        exit();
-    }
-
-}else{
-    header("Location: ../index.php");
+/* CHECK ADMIN LOGIN */
+if(!isset($_SESSION['user_id'])){
+    header("Location: ../login.php");
     exit();
+}
+
+if($_SESSION['user_role'] != "admin"){
+    echo "Access denied!";
+    exit();
+}
+
+/* FETCH ALL ORDERS */
+$sql = "SELECT * FROM single_order ORDER BY id DESC";
+$result = mysqli_query($conn, $sql);
+
+if(!$result){
+    die("Database Error: " . mysqli_error($conn));
 }
 ?>
 
@@ -27,11 +26,13 @@ if(isset($_SESSION['user_id'])){
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>View Products</title>
+<title>Admin - View Orders</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
+
+/* RESET */
 *{
     margin:0;
     padding:0;
@@ -98,7 +99,7 @@ if(isset($_SESSION['user_id'])){
     padding:30px;
 }
 
-/* TABLE CARD */
+/* TABLE BOX */
 .table-box{
     background:white;
     padding:20px;
@@ -131,33 +132,13 @@ tr:hover{
     background:#f9f9f9;
 }
 
-/* IMAGE */
-img{
-    width:80px;
-    border-radius:6px;
+/* BADGE STYLE */
+.badge{
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
+    background:#eee;
 }
-
-/* BUTTONS */
-a.update{
-    padding:6px 10px;
-    background:#4CAF50;
-    color:white;
-    border-radius:5px;
-    text-decoration:none;
-    font-size:13px;
-}
-
-a.delete{
-    padding:6px 10px;
-    background:#e74c3c;
-    color:white;
-    border-radius:5px;
-    text-decoration:none;
-    font-size:13px;
-}
-
-a.update:hover{ background:#3e8e41; }
-a.delete:hover{ background:#c0392b; }
 
 </style>
 </head>
@@ -169,7 +150,8 @@ a.delete:hover{ background:#c0392b; }
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="logo">KARTIFY</div>
-       <a href="dashboard.php">Dashboard</a>
+
+        <a href="dashboard.php">Dashboard</a>
         <a href="addproduct.php">Add Product</a>
         <a href="displayproduct.php">Manage Products</a>
         <a href="vieworder.php">Orders</a>
@@ -181,7 +163,7 @@ a.delete:hover{ background:#c0392b; }
 
         <!-- HEADER -->
         <div class="header">
-            <h2>All Products</h2>
+            <h2>Customer Orders</h2>
             <div>Admin Panel</div>
         </div>
 
@@ -191,42 +173,29 @@ a.delete:hover{ background:#c0392b; }
             <div class="table-box">
 
                 <table>
+
                     <thead>
                         <tr>
-                            <th>Product Name</th>
-                            <th>Description</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Image</th>
-                            <th>Category</th>
-                            <th>Update</th>
-                            <th>Delete</th>
+                            <th>Order ID</th>
+                            <th>User ID</th>
+                            <th>Product ID</th>
+                            <th>Total Amount</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        <?php while($row=mysqli_fetch_assoc($result)){ ?>
+
+                        <?php while($row = mysqli_fetch_assoc($result)){ ?>
+
                         <tr>
-                            <td><?php echo $row['name'] ?></td>
-                            <td><?php echo $row['description'] ?></td>
-                            <td><?php echo $row['price'] ?></td>
-                            <td><?php echo $row['stock'] ?></td>
-                            <td>
-                                <img src="../image/<?php echo $row['image'] ?>" alt="">
-                            </td>
-                            <td><?php echo $row['category_name'] ?></td>
-                            <td>
-                                <a class="update" href="updateproduct.php?product_id=<?php echo $row['id'] ?>">
-                                    Update
-                                </a>
-                            </td>
-                            <td>
-                                <a class="delete" href="deleteproduct.php?product_id=<?php echo $row['id'] ?>">
-                                    Delete
-                                </a>
-                            </td>
+                            <td>#<?php echo $row['id']; ?></td>
+                            <td><?php echo $row['user_id']; ?></td>
+                            <td><?php echo $row['product_id']; ?></td>
+                            <td>৳ <?php echo $row['total_amount']; ?></td>
                         </tr>
-                        <?php } ?> 
+
+                        <?php } ?>
+
                     </tbody>
 
                 </table>
