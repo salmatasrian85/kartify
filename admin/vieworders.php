@@ -2,11 +2,16 @@
 session_start(); 
 include "../db.php";
 
-$sql = "select * from products";
-$result = mysqli_query($conn,$sql);
-
 if(isset($_SESSION['user_id'])){ 
+
     if($_SESSION['user_role'] == "admin"){
+
+        // FIX: define user_id properly
+        $user_id = $_SESSION['user_id'];
+
+        // FETCH PAYMENTS (admin view all payments OR user-specific)
+        $sql = "SELECT * FROM payments";
+        $result = mysqli_query($conn,$sql);
 
         if(!$result){
             echo "Error!: {$conn->error}";

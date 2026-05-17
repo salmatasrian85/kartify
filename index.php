@@ -1,6 +1,10 @@
-<?php 
+<?php  
 session_start();
 include "db.php";
+
+/* CATEGORY LIST */
+$sql_category = "SELECT * FROM categories";
+$result_category = mysqli_query($conn, $sql_category);
 
 /* ALL PRODUCTS */
 $sql_product_category = "SELECT * FROM products";
@@ -12,139 +16,131 @@ if(isset($_GET['category_name']) && $_GET['category_name'] != ""){
 }
 
 $result_product_category = mysqli_query($conn, $sql_product_category);
-
-/* CATEGORY LIST */
-$sql_category = "SELECT * FROM categories";
-$result_category = mysqli_query($conn, $sql_category);
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Art Gallery</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<title>KARTIFY</title>
 
 <style>
+body { margin:0; font-family:Arial; background:#fbfaf8; }
 
-/* ===== BASE ===== */
-body {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  background: #fbfaf8;
-  color: #1a1a1a;
-}
-
-:root {
-  --cream: #fbfaf8;
-  --ink: #1a1a1a;
-  --gold: #c5a059;
-}
-
-/* ===== NAVBAR ===== */
+/* NAVBAR */
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px 60px;
-  align-items: center;
+  display:flex;
+  justify-content:space-between;
+  padding:20px 60px;
+  align-items:center;
+  background:#fbfaf8;
 }
 
 .logo {
-  font-family: "Playfair Display", serif;
-  font-size: 24px;
-  font-weight: 700;
+  font-size:24px;
+  font-weight:bold;
 }
 
 nav a {
-  margin-left: 20px;
-  text-decoration: none;
-  color: var(--ink);
+  margin-left:15px;
+  text-decoration:none;
+  color:black;
 }
 
 nav a:hover {
-  color: var(--gold);
+  color:#c5a059;
 }
 
-/* ===== HERO ===== */
-.hero {
-  text-align: center;
-  padding: 80px 20px;
-}
-
-.hero h1 {
-  font-family: "Playfair Display", serif;
-  font-size: 42px;
-  font-style: italic;
-  margin-bottom: 10px;
-}
-
-.hero p {
-  max-width: 600px;
-  margin: auto;
-  color: #555;
-  font-size: 16px;
-}
-/* ===== GALLERY ===== */
+/* GALLERY */
 .gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 280px));
-  justify-content: center;   /* 🔥 CENTER ITEMS */
-  gap: 30px;
-  padding: 40px 60px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,280px));
+  gap:30px;
+  justify-content:center;
+  padding:40px;
 }
 
-/* ===== CARD ===== */
 .card {
-  position: relative;
-  height: 280px;   /* 🔽 slightly smaller */
-  width: 100%;
-  max-width: 280px; /* 🔥 prevents oversize */
+  background: white;
   border-radius: 12px;
   overflow: hidden;
+  width: 100%;
+  max-width: 280px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: 0.3s;
 }
 
-/* 🔥 REAL IMAGE */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
 .card img {
   width: 100%;
-  height: 100%;
+  height: 200px;
   object-fit: cover;
-  transition: 0.4s;
 }
 
-/* overlay */
+/* REMOVE overlay completely */
 .overlay {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  padding: 20px;
-  background: linear-gradient(to top, rgba(26,26,26,0.8), transparent);
-  color: white;
+  position: static;
+  background: none;
+  color: black;
+  padding: 15px;
 }
 
 .overlay h3 {
+  margin: 0 0 5px;
+  font-size: 16px;
+}
+
+.overlay p {
   margin: 0;
-  font-family: "Playfair Display", serif;
+  font-weight: bold;
+  color: #c5a059;
 }
 
-/* hover */
-.card:hover img {
-  transform: scale(1.1);
+/* STYLES FOR STOCK ELEMENT */
+.stock-status {
+  font-size: 13px;
+  color: #666;
+  margin-top: 5px;
 }
 
+.out-of-stock {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+.buy-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: #c5a059;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* DISABLED BUTTON FOR OUT OF STOCK */
+.buy-btn.disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none; /* disables click functionality */
+}
 </style>
 </head>
 
 <body>
 
-<!-- ===== NAVBAR ===== -->
 <header class="navbar">
-  <div class="logo">kARTify</div>
 
-  <!-- CATEGORY -->
+  <div class="logo">KARTIFY</div>
+
   <nav>
     <a href="index.php">All</a>
+
     <?php while($row_category = mysqli_fetch_assoc($result_category)){ ?>
       <a href="index.php?category_name=<?php echo $row_category['name']; ?>">
         <?php echo $row_category['name']; ?>
@@ -152,28 +148,25 @@ nav a:hover {
     <?php } ?>
   </nav>
 
-  <!-- AUTH -->
   <nav>
+
+    <!-- If user is NOT logged in -->
     <?php if(!isset($_SESSION['user_id'])){ ?>
-      <a href="login.php">Login</a>
-      <a href="register.php">Signup</a>
+        <a href="login.php">Login</a>
+        <a href="register.php">Signup</a>
     <?php } ?>
-    <a href="#">Dashboard</a>
-  </nav>
+
+    <!-- Show "My Orders" ONLY if logged in AND role is user -->
+    <?php if(isset($_SESSION['user_id']) && $_SESSION['user_role'] == "user"){ ?>
+        <a href="myorders.php">My Orders</a>
+    <?php } ?>
+
+</nav>
+
 </header>
 
-<!-- ===== HERO ===== -->
-<section class="hero">
+<h2 style="text-align:center;">Products</h2>
 
-  <h1>Where Vision Meets Reality.</h1>
-
-  <p>
-    Explore our curated collection of contemporary masterworks, 
-    hand-selected to elevate your environment and inspire your soul.
-  </p>
-
-</section>
-<!-- ===== PRODUCTS (GALLERY STYLE) ===== -->
 <section class="gallery">
 
 <?php while($row = mysqli_fetch_assoc($result_product_category)){ ?>
@@ -185,6 +178,29 @@ nav a:hover {
     <div class="overlay">
       <h3><?php echo $row['name']; ?></h3>
       <p><?php echo $row['price']; ?> ৳</p>
+
+      <div class="stock-status">
+        <?php if($row['stock'] > 0){ ?>
+            Stock: <?php echo $row['stock']; ?> items available
+        <?php } else { ?>
+            <span class="out-of-stock">Out of Stock</span>
+        <?php } ?>
+      </div>
+
+      <?php if($row['stock'] > 0){ ?>
+          <?php if(isset($_SESSION['user_id'])){ ?>
+            <a href="singleorder.php?product_id=<?php echo $row['id']; ?>" class="buy-btn">
+              Buy Now
+            </a>
+          <?php } else { ?>
+            <a href="login.php" class="buy-btn">
+              Buy Now
+            </a>
+          <?php } ?>
+      <?php } else { ?>
+          <a href="#" class="buy-btn disabled">Unavailable</a>
+      <?php } ?>
+
     </div>
 
   </div>

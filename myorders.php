@@ -1,22 +1,35 @@
 <?php
 session_start(); 
-if(isset($_SESSION['user_id'])) {
-    if($_SESSION['user_role'] == "admin"){
+include "db.php";
+
+if(isset($_SESSION['user_id'])){ 
+    if($_SESSION['user_role'] == "user"){
+
+        $user_id = $_SESSION['user_id'];
+
+        $sql = "SELECT * FROM payments WHERE user_id = '$user_id'";
+        $result = mysqli_query($conn,$sql);
+
+        if(!$result){
+            echo "Error!: {$conn->error}";
+        }
 
     }else{
-       header("Location: ../dashboard.php");
+        header("Location: admin/dashboard.php");
+        exit();
     }
+
 }else{
     header("Location: ../index.php");
+    exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard</title>
+<title>Customer Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -95,13 +108,7 @@ if(isset($_SESSION['user_id'])) {
     padding:30px;
 }
 
-/* CARDS */
-.cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:20px;
-}
-
+/* CARD */
 .card{
     background:white;
     padding:25px;
@@ -109,13 +116,26 @@ if(isset($_SESSION['user_id'])) {
     box-shadow:0 10px 25px rgba(0,0,0,0.05);
 }
 
-.card h3{
-    margin-bottom:10px;
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
 }
 
-.card p{
-    color:#666;
-    font-size:14px;
+thead{
+    background:#111;
+    color:white;
+}
+
+th, td{
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #eee;
+}
+
+tbody tr:hover{
+    background:#f9f9f9;
 }
 
 </style>
@@ -129,11 +149,9 @@ if(isset($_SESSION['user_id'])) {
     <div class="sidebar">
         <div class="logo">KARTIFY</div>
 
-        <a href="dashboard.php">Dashboard</a>
-        <a href="addproduct.php">Add Product</a>
-        <a href="#">Manage Products</a>
-        <a href="#">Orders</a>
-        <a href="../logout.php">Logout</a>
+        <a href="index.php">Shop</a>
+        <a href="#">Profile</a>
+        <a href="logout.php">Logout</a>
     </div>
 
     <!-- MAIN -->
@@ -141,7 +159,7 @@ if(isset($_SESSION['user_id'])) {
 
         <!-- HEADER -->
         <div class="header">
-            <h2>Admin Dashboard</h2>
+            <h2>My Orders</h2>
             <div class="user">
                 Welcome, <?php echo $_SESSION['user_name']; ?>
             </div>
@@ -150,27 +168,31 @@ if(isset($_SESSION['user_id'])) {
         <!-- CONTENT -->
         <div class="content">
 
-            <div class="cards">
+            <div class="card">
 
-                <div class="card">
-                    <h3>Products</h3>
-                    <p>Manage all products in your store.</p>
-                </div>
+                <h3>Your Payment History</h3>
 
-                <div class="card">
-                    <h3>Orders</h3>
-                    <p>View and manage customer orders.</p>
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User ID</th>
+                            <th>Total Amount</th>
+                            <th>Payment Method</th>
+                        </tr>
+                    </thead>
 
-                <div class="card">
-                    <h3>Users</h3>
-                    <p>Manage registered users.</p>
-                </div>
-
-                <div class="card">
-                    <h3>Analytics</h3>
-                    <p>Track performance and sales.</p>
-                </div>
+                    <tbody>
+                        <?php while($row=mysqli_fetch_assoc($result)){ ?>
+                        <tr>
+                            <td><?php echo $row['order_id'] ?></td>
+                            <td><?php echo $row['user_id']?></td>
+                            <td>৳ <?php echo $row['total_amount']?></td>
+                            <td><?php echo $row['payment_method']?></td>
+                        </tr>
+                        <?php } ?> 
+                    </tbody>
+                </table>
 
             </div>
 

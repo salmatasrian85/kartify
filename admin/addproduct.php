@@ -1,10 +1,13 @@
-<?php
+<?php 
 session_start(); 
 include "../db.php";
+
+$msg = "";
 
 if(isset($_SESSION['user_id'])){
 
     if($_SESSION['user_role'] == "admin"){
+
         $sql1 = "SELECT * FROM categories";
         $result1 = mysqli_query($conn,$sql1);
 
@@ -18,25 +21,29 @@ if(isset($_SESSION['user_id'])){
             $category_name = $_POST['category_name'];
             $new_category = $_POST['new_category'];
 
+            // ================= CATEGORY LOGIC =================
             if(!empty($new_category)){
-            $category_name = $new_category;
+                $category_name = $new_category;
 
-            // check if category already exists
-            $check = "SELECT * FROM categories WHERE name='$new_category'";
-            $check_result = mysqli_query($conn, $check);
+                // check if category exists
+                $check = "SELECT * FROM categories WHERE name='$new_category'";
+                $check_result = mysqli_query($conn, $check);
 
-            if(mysqli_num_rows($check_result) == 0){
-                // insert only if not exists
-                $insert_cat = "INSERT INTO categories (name) VALUES ('$new_category')";
-                mysqli_query($conn, $insert_cat);
+                if(mysqli_num_rows($check_result) > 0){
+                    $msg = "Category already exists!";
+                } else {
+                    $insert_cat = "INSERT INTO categories (name) VALUES ('$new_category')";
+                    mysqli_query($conn, $insert_cat);
+                    $msg = "New category added!";
+                }
             }
-        }
 
+            // ================= IMAGE UPLOAD =================
             $image = $_FILES['image']['name'];
             $tmp_location = $_FILES['image']['tmp_name'];
+            $upload_location = "../image/";
 
-            $upload_location= "../image/";
-
+            // ================= PRODUCT INSERT =================
             $sql = "INSERT INTO products 
                 (name, description, price, stock, image, category_name)
                 VALUES
@@ -48,15 +55,16 @@ if(isset($_SESSION['user_id'])){
                 echo "Error!: {$conn->error}";
             }else{
                 move_uploaded_file($tmp_location,$upload_location.$image);
-                echo "Product added successfully!";
+                $msg .= " Product added successfully!";
             }
         }
 
-    }else{
+    } else {
         echo "go for user dashboard";
+        exit();
     }
 
-}else{
+} else {
     header("Location: ../index.php");
     exit();
 }
@@ -65,135 +73,182 @@ if(isset($_SESSION['user_id'])){
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Add Product</title>
+<title>Add Product</title>
 
-    <style>
-        *{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body{
-            font-family: Arial;
-            background: #f4f6f8;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        .sidebar{
-            width: 220px;
-            height: 100vh;
-            background: darkcyan;
-            position: fixed;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Inter", sans-serif;
+}
 
-        .sidebar ul{
-            padding: 20px 0;
-        }
+.container{
+    display:flex;
+}
 
-        .sidebar ul li{
-            list-style: none;
-        }
+.sidebar{
+    width:240px;
+    height:100vh;
+    background:#111;
+    color:white;
+    padding:30px;
+    position:fixed;
+}
 
-        .sidebar ul li a{
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 12px;
-            text-align: center;
-        }
+.logo{
+    font-size:24px;
+    margin-bottom:40px;
+    letter-spacing:2px;
+}
 
-        .sidebar ul li a:hover{
-            background: black;
-        }
+.sidebar a{
+    display:block;
+    color:#bbb;
+    text-decoration:none;
+    margin:15px 0;
+}
 
-        .main{
-            margin-left: 240px;
-            padding: 40px;
-        }
+.sidebar a:hover{
+    color:white;
+}
 
-        .form-box{
-            background: white;
-            padding: 30px;
-            width: 400px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+.main{
+    margin-left:240px;
+    width:100%;
+    background:#f5f6fa;
+    min-height:100vh;
+}
 
-        input, textarea, select{
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
+.header{
+    padding:20px 30px;
+    background:white;
+    display:flex;
+    justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
 
-        .btn{
-            background: lightcoral;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+.content{
+    padding:30px;
+    display:flex;
+    justify-content:center;
+}
 
-        .btn:hover{
-            background: crimson;
-        }
+.form-box{
+    background:white;
+    padding:35px;
+    width:450px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
 
-        .or-text{
-            text-align: center;
-            color: gray;
-            font-size: 14px;
-        }
+input, textarea, select{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
 
-    </style>
+.btn{
+    width:100%;
+    padding:12px;
+    background:#111;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.or-text{
+    text-align:center;
+    color:#888;
+    margin:10px 0;
+}
+
+.msg{
+    margin-bottom:15px;
+    color:red;
+    font-weight:500;
+}
+</style>
 </head>
+
 <body>
 
-<div class="sidebar">
-    <ul>
-        <li><a href="addproduct.php">Add Product</a></li>
-        <li><a href="displayproduct.php">View Product</a></li>
-        <li><a href="../logout.php">Logout</a></li>
-    </ul>
-</div>
+<div class="container">
 
-<div class="main">
-    <div class="form-box">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">KARTIFY</div>
+        <a href="dashboard.php">Dashboard</a>
+        <a href="addproduct.php">Add Product</a>
+        <a href="displayproduct.php">View Product</a>
+        <a href="../logout.php">Logout</a>
+    </div>
 
-        <h2>Add Product</h2>
+    <!-- MAIN -->
+    <div class="main">
 
-        <form method="post" enctype="multipart/form-data">
+        <div class="header">
+            <h2>Add Product</h2>
+            <div>Admin Panel</div>
+        </div>
 
-            <input type="text" name="name" placeholder="Product Name" required>
+        <div class="content">
 
-            <textarea name="description" placeholder="Description"></textarea>
+            <div class="form-box">
 
-            <input type="number" name="price" placeholder="Price">
+                <h2>Create New Product</h2>
 
-            <input type="number" name="stock" placeholder="Stock">
-
-            <input type="file" name="image">
-
-            <select name="category_name">
-                <option value="">Select Existing Category</option>
-                <?php while($row = mysqli_fetch_assoc($result1)){ ?>
-                    <option value="<?php echo $row['name']; ?>">
-                        <?php echo $row['name']; ?>
-                    </option>
+                <!-- MESSAGE -->
+                <?php if(!empty($msg)) { ?>
+                    <div class="msg"><?php echo $msg; ?></div>
                 <?php } ?>
-            </select>
 
-            <p class="or-text">OR</p>
+                <form method="post" enctype="multipart/form-data">
 
-            
-            <input type="text" name="new_category" placeholder="Add New Category">
+                <label>Product Name</label>
+                <input type="text" name="name" required>
 
-            <input type="submit" name="submit" value="Add Product" class="btn">
+                <label>Description</label>
+                <textarea name="description"></textarea>
 
-        </form>
+                <label>Price</label>
+                <input type="number" name="price">
+
+                <label>Stock</label>
+                <input type="number" name="stock">
+
+                <label>Product Image</label>
+                <input type="file" name="image">
+
+                <label>Select Category</label>
+                <select name="category_name">
+                    <option value="">Choose existing category</option>
+                    <?php while($row = mysqli_fetch_assoc($result1)){ ?>
+                        <option value="<?php echo $row['name']; ?>">
+                            <?php echo $row['name']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
+                <label>Add New Category</label>
+                <input type="text" name="new_category">
+
+                <button class="btn" type="submit" name="submit">
+                    Add Product
+                </button>
+
+                </form>
+
+            </div>
+
+        </div>
 
     </div>
+
 </div>
 
 </body>
