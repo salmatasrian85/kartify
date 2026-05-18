@@ -13,7 +13,7 @@ if(isset($_POST['submit'])){
     $address = $_POST['address'];
     $role = "user";
 
-    /* CHECK IF EMAIL ALREADY EXISTS */
+    /*IF EMAIL ALREADY EXISTS */
     $check = "SELECT * FROM users WHERE email='$email'";
     $resultCheck = mysqli_query($conn, $check);
 
@@ -129,6 +129,24 @@ if(isset($_POST['submit'])){
 .btn:hover{
     background:#333;
 }
+.back-home{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 14px;
+    background: white;
+    border: 1px solid #111;
+    color: #111;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.back-home:hover{
+    background: #111;
+    color: white;
+}
 
 /* LOGIN BUTTON */
 .login-btn{
@@ -158,6 +176,8 @@ if(isset($_POST['submit'])){
 <body>
 
 <div class="main">
+    <!-- BACK TO HOME -->
+    <a href="index.php" class="back-home">← Back to Home</a>
 
     <div class="card">
 

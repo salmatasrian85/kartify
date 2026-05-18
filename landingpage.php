@@ -1,9 +1,24 @@
 <?php
 include "db.php";
 
-/* FETCH PRODUCTS */
+/* FETCH CATEGORIES */
+$sql_category = "SELECT * FROM categories";
+$result_category = mysqli_query($conn, $sql_category);
+
+/* DEFAULT PRODUCTS */
 $sql = "SELECT * FROM products";
+
+/* CATEGORY FILTER */
+if(isset($_GET['category_name']) && $_GET['category_name'] != ""){
+    $category_name = mysqli_real_escape_string($conn, $_GET['category_name']);
+    $sql = "SELECT * FROM products WHERE category_name = '$category_name'";
+}
+
 $result = mysqli_query($conn, $sql);
+
+/* FEATURED PRODUCTS (latest 4) */
+$sql_featured = "SELECT * FROM products ORDER BY id DESC LIMIT 4";
+$result_featured = mysqli_query($conn, $sql_featured);
 ?>
 
 <!DOCTYPE html>
@@ -18,6 +33,7 @@ $result = mysqli_query($conn, $sql);
   <title>KARTIFY — Contemporary Art Gallery</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
 
@@ -200,15 +216,25 @@ $result = mysqli_query($conn, $sql);
     .btn:hover{
       background: white;
     }
+    .featured{
+      padding: 60px 40px;
+      text-align: center;
+    }
 
+    .featured h2{
+      font-size: 52px;
+      margin-bottom: 40px;
+    }
+
+    .featured-grid{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
+      justify-content: center;
+      gap: 30px;
+    }
     /* =========================
        TOP BROWSE SECTION
     ========================= */
-
-    .browse-section{
-      padding: 45px 40px 20px;
-      border-bottom: 1px solid #ece7df;
-    }
 
     .browse-top{
       display: flex;
@@ -287,10 +313,9 @@ $result = mysqli_query($conn, $sql);
     }
 
     .card{
-      background: white;
-      overflow: hidden;
-      transition: 0.4s;
-      box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+      width: 100%;
+      max-width: 300px; /* 🔥 limit size */
+      margin: auto;
     }
 
     .card:hover{
@@ -584,7 +609,11 @@ $result = mysqli_query($conn, $sql);
       }
 
       .grid{
-        padding: 40px 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 300px));
+        justify-content: center; /* 🔥 important */
+        gap: 35px;
+        padding: 50px 40px;
       }
 
       .filters{
@@ -619,17 +648,14 @@ $result = mysqli_query($conn, $sql);
 
       <input type="text" placeholder="Search arts or works">
 
-      <!-- 🔥 LOGIN + SIGNUP BUTTONS ADDED -->
+      <!--  LOGIN + SIGNUP BUTTONS -->
       <div class="auth-links">
 
         <a href="login.php" class="auth-btn login-btn">Login</a>
 
-        <a href="signup.php" class="auth-btn signup-btn">Signup</a>
+      <a href="register.php" class="auth-btn signup-btn">Signup</a>
 
       </div>
-
-      <button class="cart">🛒</button>
-
     </div>
 
   </nav>
@@ -655,39 +681,71 @@ $result = mysqli_query($conn, $sql);
       </button>
 
     </div>
-
+    
   </header>
+  <!-- FEATURED PRODUCTS -->
+<section class="featured">
 
-  <!-- TOP BROWSE -->
-  <section class="browse-section">
+  <h2 class="serif">Featured Works</h2>
 
-    <div class="browse-top">
+  <div class="featured-grid">
 
-      <input
-        type="text"
-        placeholder="Search by keyword, artist name, artwork title or exhibition"
-      >
+    <?php while($f = mysqli_fetch_assoc($result_featured)){ ?>
 
-      <button>SEARCH</button>
+      <div class="card">
 
-    </div>
+        <img src="image/<?php echo $f['image']; ?>" alt="">
 
-    <div class="browse-title">
-      <h2>PAINTINGS</h2>
-    </div>
+        <div class="card-content">
 
-  </section>
+          <h3 class="serif">
+            <?php echo htmlspecialchars($f['name']); ?>
+          </h3>
 
-  <!-- FILTERS -->
+          <p>
+            <?php echo htmlspecialchars($f['category_name']); ?>
+          </p>
+
+          <span class="price">
+            ৳ <?php echo $f['price']; ?>
+          </span>
+
+        </div>
+
+      </div>
+
+    <?php } ?>
+
+  </div>
+
+</section>
+
   <section class="filters">
 
-    <button class="active">All</button>
-    <button>Flower Vase Acrylic Painting</button>
-    <button>Oil Painting</button>
-    <button>Custom Artwork</button>
-    <button>Texture Painting</button>
+  <!-- ALL BUTTON -->
+  <a href="?#filters">
+  <button class="<?php if(!isset($_GET['category_name'])) echo 'active'; ?>">
+    All
+  </button>
+</a>
 
-  </section>
+  <!-- DYNAMIC CATEGORY BUTTONS -->
+  <?php while($row_category = mysqli_fetch_assoc($result_category)){ ?>
+
+    <a href="landingpage.php?category_name=<?php echo urlencode($row_category['name']); ?>">
+      
+      <button class="<?php 
+        if(isset($_GET['category_name']) && $_GET['category_name'] == $row_category['name']) 
+          echo 'active'; 
+      ?>">
+        <?php echo htmlspecialchars($row_category['name']); ?>
+      </button>
+
+    </a>
+
+  <?php } ?>
+
+</section>
 
   <!-- PRODUCT GRID -->
   <main class="grid">
@@ -754,10 +812,10 @@ $result = mysqli_query($conn, $sql);
 
       <div class="social-icons">
 
-        <a href="#">f</a>
-        <a href="#">i</a>
-        <a href="#">t</a>
-        <a href="#">▶</a>
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
 
       </div>
 
