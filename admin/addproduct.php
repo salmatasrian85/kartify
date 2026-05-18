@@ -170,7 +170,7 @@ input, textarea, select{
 
 .msg{
     margin-bottom:15px;
-    color:red;
+    color:green;
     font-weight:500;
 }
 </style>

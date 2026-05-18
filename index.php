@@ -1,4 +1,5 @@
 <?php
+session_start();
 include "db.php";
 
 /* FETCH CATEGORIES */
@@ -651,9 +652,22 @@ $result_featured = mysqli_query($conn, $sql_featured);
       <!--  LOGIN + SIGNUP BUTTONS -->
       <div class="auth-links">
 
-        <a href="login.php" class="auth-btn login-btn">Login</a>
+      <?php if(isset($_SESSION['user_id'])){ ?>
 
-        <a href="register.php" class="auth-btn signup-btn">Signup</a>
+          <!-- LOGGED IN USER -->
+          <span style="font-size:14px;">
+              Welcome <?php echo $_SESSION['user_name']; ?>
+          </span>
+
+          <a href="logout.php" class="auth-btn signup-btn">Logout</a>
+
+      <?php } else { ?>
+
+          <!-- NOT LOGGED IN -->
+          <a href="login.php" class="auth-btn login-btn">Login</a>
+          <a href="register.php" class="auth-btn signup-btn">Signup</a>
+
+      <?php } ?>
 
       </div>
     </div>
@@ -673,7 +687,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
       </h2>
 
       <p>
-        Curating exceptional contemporary works from global artists and bringing timeless creativity into modern spaces.
+        Welcome to our art shop—a space where creativity comes to life. From vibrant paintings to handcrafted pieces, every item here tells a story. Whether you're an art lover, a collector, or simply exploring, we invite you to discover inspiration in every corner.
       </p>
 
       <button class="btn">

@@ -7,7 +7,6 @@ $row = null;
 if(isset($_SESSION['user_id'])){
     if($_SESSION['user_role'] == "admin"){
 
-        // First load: get product data
         if(isset($_GET['product_id'])){
             $product_id = $_GET['product_id'];
 
@@ -16,7 +15,6 @@ if(isset($_SESSION['user_id'])){
             $row = mysqli_fetch_assoc($result);
         }
 
-        // Update
         if(isset($_POST['update'])){
             $product_id = $_POST['product_id'];
 
@@ -29,7 +27,6 @@ if(isset($_SESSION['user_id'])){
             $tmp_location = $_FILES['image']['tmp_name'];
 
             if($image == ""){
-                // No new image
                 $sql2 = "UPDATE products SET 
                         name='$name',
                         description='$description',
@@ -37,7 +34,6 @@ if(isset($_SESSION['user_id'])){
                         stock='$stock'
                         WHERE id='$product_id'";
             } else {
-                // New image
                 $upload_location = "../image/";
                 move_uploaded_file($tmp_location, $upload_location.$image);
 
@@ -55,7 +51,6 @@ if(isset($_SESSION['user_id'])){
             if(!$result2){
                 echo "Error: {$conn->error}";
             }else{
-                // Redirect to view page
                 header("Location: displayproduct.php");
                 exit();
             }
@@ -73,148 +68,217 @@ if(isset($_SESSION['user_id'])){
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Update Product</title>
+<meta charset="UTF-8">
+<title>Update Product</title>
 
-    <style>
-        *{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        body{
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Inter", sans-serif;
+}
 
-        /* Sidebar */
-        .sidebar{
-            width: 220px;
-            height: 100vh;
-            background: darkcyan;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
+/* LAYOUT */
+.container{
+    display:flex;
+}
 
-        .sidebar ul{
-            list-style: none;
-            padding: 20px 0;
-        }
+/* SIDEBAR */
+.sidebar{
+    width:240px;
+    height:100vh;
+    background:#111;
+    color:white;
+    padding:30px;
+    position:fixed;
+}
 
-        .sidebar ul li a{
-            display: block;
-            padding: 12px;
-            text-decoration: none;
-            color: white;
-            text-align: center;
-        }
+.logo{
+    font-size:24px;
+    margin-bottom:40px;
+    letter-spacing:2px;
+}
 
-        .sidebar ul li a:hover{
-            background: black;
-        }
+.sidebar a{
+    display:block;
+    color:#bbb;
+    text-decoration:none;
+    margin:15px 0;
+    transition:0.3s;
+}
 
-        /* Main */
-        .main{
-            margin-left: 240px;
-            padding: 40px;
-        }
+.sidebar a:hover{
+    color:white;
+}
 
-        .form-box{
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 400px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+/* MAIN */
+.main{
+    margin-left:240px;
+    width:100%;
+    background:#f5f6fa;
+    min-height:100vh;
+}
 
-        h2{
-            margin-bottom: 20px;
-            text-align: center;
-        }
+/* HEADER */
+.header{
+    padding:20px 30px;
+    background:white;
+    display:flex;
+    justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
 
-        input, textarea{
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
+.header h2{
+    font-size:20px;
+}
 
-        input[type="file"]{
-            border: none;
-        }
+/* CONTENT */
+.content{
+    padding:30px;
+}
 
-        .btn{
-            background: lightcoral;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-        }
+/* FORM CARD */
+.form-box{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    width:500px;
+}
 
-        .btn:hover{
-            background: crimson;
-        }
+/* LABEL */
+label{
+    display:block;
+    margin-top:12px;
+    font-size:14px;
+    font-weight:500;
+    color:#333;
+}
 
-        img{
-            margin-top: 10px;
-            border-radius: 8px;
-        }
+/* INPUTS */
+input, textarea{
+    width:100%;
+    padding:12px;
+    margin-top:6px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
 
-    </style>
+input:focus, textarea:focus{
+    outline:none;
+    border-color:#111;
+}
+
+/* BUTTON */
+.btn{
+    background:#111;
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:6px;
+    cursor:pointer;
+    width:100%;
+    margin-top:15px;
+}
+
+.btn:hover{
+    background:#333;
+}
+
+/* IMAGE BOX */
+.image-box{
+    margin:10px 0 15px 0;
+    padding:10px;
+    border:1px dashed #ccc;
+    border-radius:8px;
+    text-align:center;
+    background:#fafafa;
+}
+
+.image-box img{
+    width:120px;
+    border-radius:8px;
+}
+
+.no-img{
+    color:#888;
+    font-size:13px;
+}
+</style>
 </head>
+
 <body>
 
-<!-- Sidebar -->
-<div class="sidebar">
-    <ul>
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">KARTIFY</div>
         <a href="dashboard.php">Dashboard</a>
         <a href="addproduct.php">Add Product</a>
         <a href="displayproduct.php">Manage Products</a>
         <a href="vieworder.php">Orders</a>
         <a href="../logout.php">Logout</a>
-    </ul>
-</div>
+    </div>
 
-<!-- Main -->
-<div class="main">
-    <div class="form-box">
+    <!-- MAIN -->
+    <div class="main">
 
-        <h2>Update Product</h2>
-        
-        <form method="post" enctype="multipart/form-data">
+        <!-- HEADER -->
+        <div class="header">
+            <h2>Update Product</h2>
+            <div>Admin Panel</div>
+        </div>
 
-            <!-- hidden id -->
-            <input type="hidden" name="product_id" value="<?php echo isset($row['id']) ? $row['id'] : ''; ?>">
+        <!-- CONTENT -->
+        <div class="content">
 
-            <input type="text" name="name" placeholder="Product Name"
-            value="<?php echo isset($row['name']) ? $row['name'] : ''; ?>" required>
+            <div class="form-box">
 
-            <textarea name="description" placeholder="Description"><?php echo isset($row['description']) ? $row['description'] : ''; ?></textarea>
+                <form method="post" enctype="multipart/form-data">
 
-            <input type="number" name="price" placeholder="Price"
-            value="<?php echo isset($row['price']) ? $row['price'] : ''; ?>" required>
+                    <input type="hidden" name="product_id" value="<?php echo isset($row['id']) ? $row['id'] : ''; ?>">
 
-            <input type="number" name="stock" placeholder="Stock"
-            value="<?php echo isset($row['stock']) ? $row['stock'] : ''; ?>" required>
+                    <label>Product Name</label>
+                    <input type="text" name="name" placeholder="Enter product name"
+                    value="<?php echo isset($row['name']) ? $row['name'] : ''; ?>" required>
 
-            <p>Current Image:</p>
+                    <label>Description</label>
+                    <textarea name="description" placeholder="Enter product description"><?php echo isset($row['description']) ? $row['description'] : ''; ?></textarea>
 
-            <?php if(isset($row['image']) && $row['image'] != ""){ ?>
-                <img src="../image/<?php echo $row['image']; ?>" width="100">
-            <?php } ?>
+                    <label>Price</label>
+                    <input type="number" name="price" placeholder="Enter price"
+                    value="<?php echo isset($row['price']) ? $row['price'] : ''; ?>" required>
 
-            <input type="file" name="image">
+                    <label>Stock</label>
+                    <input type="number" name="stock" placeholder="Enter stock quantity"
+                    value="<?php echo isset($row['stock']) ? $row['stock'] : ''; ?>" required>
 
-            <input type="submit" name="update" value="Update Product" class="btn">
+                    <label>Current Image</label>
+                    <div class="image-box">
+                        <?php if(isset($row['image']) && $row['image'] != ""){ ?>
+                            <img src="../image/<?php echo $row['image']; ?>">
+                        <?php } else { ?>
+                            <p class="no-img">No image available</p>
+                        <?php } ?>
+                    </div>
 
-        </form>
+                    <label>Upload New Image</label>
+                    <input type="file" name="image">
+
+                    <input type="submit" name="update" value="Update Product" class="btn">
+
+                </form>
+
+            </div>
+
+        </div>
 
     </div>
+
 </div>
 
 </body>
