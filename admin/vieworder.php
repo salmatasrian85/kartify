@@ -45,9 +45,7 @@ if(!$result){
 }
 
 /* LAYOUT */
-.container{
-    display:flex;
-}
+.container{ display:flex; }
 
 /* SIDEBAR */
 .sidebar{
@@ -71,9 +69,7 @@ if(!$result){
     margin:15px 0;
 }
 
-.sidebar a:hover{
-    color:white;
-}
+.sidebar a:hover{ color:white; }
 
 /* MAIN */
 .main{
@@ -92,8 +88,23 @@ if(!$result){
 }
 
 /* CONTENT */
-.content{
-    padding:30px;
+.content{ padding:30px; }
+
+/* ALERTS */
+.success{
+    background:#d4edda;
+    color:#155724;
+    padding:10px;
+    border-radius:5px;
+    margin-bottom:15px;
+}
+
+.error{
+    background:#f8d7da;
+    color:#721c24;
+    padding:10px;
+    border-radius:5px;
+    margin-bottom:15px;
 }
 
 /* TABLE */
@@ -121,14 +132,13 @@ td{
     text-align:center;
 }
 
-/* STATUS BADGE */
+/* STATUS */
 .badge{
     padding:5px 10px;
     border-radius:20px;
     font-size:12px;
     color:white;
 }
-
 .pending{ background:orange; }
 .completed{ background:green; }
 .cancelled{ background:red; }
@@ -141,7 +151,6 @@ td{
     font-size:12px;
     color:white;
 }
-
 .view{ background:#3498db; }
 .update{ background:#2ecc71; }
 .delete{ background:#e74c3c; }
@@ -174,6 +183,19 @@ td{
 
         <div class="content">
 
+            <!-- SHOW MESSAGE -->
+            <?php if(isset($_GET['msg'])){ ?>
+
+                <?php if($_GET['msg'] == "deleted"){ ?>
+                    <div class="success">Order deleted successfully!</div>
+                <?php } ?>
+
+                <?php if($_GET['msg'] == "error"){ ?>
+                    <div class="error">Something went wrong!</div>
+                <?php } ?>
+
+            <?php } ?>
+
             <div class="table-box">
 
                 <table>
@@ -204,7 +226,7 @@ td{
 
                         <td><?php echo $row['product_id']; ?></td>
 
-                        <td>৳ <?php echo $row['total_amount']; ?></td>
+                        <td>Tk <?php echo $row['total_amount']; ?></td>
 
                         <td>
                             <span class="badge <?php echo $row['status']; ?>">
