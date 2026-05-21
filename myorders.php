@@ -49,40 +49,22 @@ if(isset($_SESSION['user_id'])){
 
 /* LAYOUT */
 .container{
-    display:flex;
+    width:100%;
 }
 
-/* SIDEBAR */
-.sidebar{
-    width:240px;
-    height:100vh;
+.back-link{
+    display:inline-block;
+    margin-top:10px;
+    padding:10px 16px;
     background:#111;
     color:white;
-    padding:30px;
-    position:fixed;
-}
-
-.logo{
-    font-size:24px;
-    margin-bottom:40px;
-    letter-spacing:2px;
-}
-
-.sidebar a{
-    display:block;
-    color:#bbb;
     text-decoration:none;
-    margin:15px 0;
-    transition:0.3s;
-}
-
-.sidebar a:hover{
-    color:white;
+    border-radius:8px;
+    font-size:14px;
 }
 
 /* MAIN */
 .main{
-    margin-left:240px;
     width:100%;
     background:#f5f6fa;
     min-height:100vh;
@@ -148,23 +130,14 @@ tbody tr:hover{
 <body>
 
 <div class="container">
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="logo">KARTIFY</div>
-
-        <a href="index.php">Shop</a>
-        <a href="cart.php">Cart</a>
-        <a href="#">Profile</a>
-        <a href="logout.php">Logout</a>
-    </div>
-
-    <!-- MAIN -->
     <div class="main">
 
         <!-- HEADER -->
         <div class="header">
-            <h2>My Orders</h2>
+            <div>
+                <h2>My Orders</h2>
+                <a href="index.php" class="back-link">Back to Shopping</a>
+            </div>
             <div class="user">
                 Welcome, <?php echo $_SESSION['user_name']; ?>
             </div>

@@ -107,7 +107,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
     .nav-right{
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 18px;
     }
 
     .nav-right input{
@@ -120,10 +120,8 @@ $result_featured = mysqli_query($conn, $sql_featured);
     }
     .auth-links{
       display: flex;
-      gap: 10px;
       align-items: center;
-      margin-left: auto;
-      order: 3;
+      gap: 10px;
     }
 
     .cart-wrap{
@@ -183,6 +181,22 @@ $result_featured = mysqli_query($conn, $sql_featured);
       line-height: 1;
       min-width: 22px;
       text-align: center;
+    }
+
+    /* Profile icon */
+    .profile-icon{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      background:#111;
+      color:white;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:600;
+      text-decoration:none;
+      margin-left:8px;
     }
 
     /* =========================
@@ -729,65 +743,65 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   <nav class="nav">
 
-    <h1 class="logo serif">KARTIFY</h1>
+  <h1 class="logo serif">KARTIFY</h1>
 
-    <div class="nav-links">
-      <a href="#">Gallery</a>
-      <a href="#">Arts</a>
-      <a href="#">Exhibitions</a>
-      <a href="#">Store</a>
-    </div>
+  <div class="nav-links">
+    <a href="#">Gallery</a>
+    <a href="#">Arts</a>
+    <a href="#">Exhibitions</a>
+    <a href="#">Store</a>
+  </div>
 
-    <div class="nav-right">
+  <div class="nav-right">
 
-  <input type="text" placeholder="Search arts or works">
+    <?php if(isset($_SESSION['user_id'])){ ?>
 
-  <div class="auth-links">
+      <div class="auth-links">
 
-  <?php if(isset($_SESSION['user_id'])){ ?>
-
-      <span style="font-size:14px;">
+        <span style="font-size:14px;">
           Welcome <?php echo $_SESSION['user_name']; ?>
-      </span>
+        </span>
 
-      <?php if(($_SESSION['user_role'] ?? '') === 'user'): ?>
-        <a href="myorders.php" class="auth-btn login-btn">My Orders</a>
-      <?php endif; ?>
+        <a href="profile.php" class="profile-icon" title="Profile">
+          <?php echo strtoupper(substr($_SESSION['user_name'],0,1)); ?>
+        </a>
 
-      <a href="logout.php" class="auth-btn signup-btn">Logout</a>
+        <?php if(($_SESSION['user_role'] ?? '') === 'user'): ?>
+          <a href="myorders.php" class="auth-btn login-btn">My Orders</a>
+        <?php endif; ?>
 
-  <?php } else { ?>
+        <a href="logout.php" class="auth-btn signup-btn">Logout</a>
 
-      <a href="login.php" class="auth-btn login-btn">Login</a>
-      <a href="register.php" class="auth-btn signup-btn">Signup</a>
+      </div>
 
-  <?php } ?>
+    <?php } else { ?>
+
+      <div class="auth-links">
+        <a href="login.php" class="auth-btn login-btn">Login</a>
+        <a href="register.php" class="auth-btn signup-btn">Signup</a>
+      </div>
+
+    <?php } ?>
+
+    <?php if(isset($_SESSION['user_id']) && ($_SESSION['user_role'] ?? '') === 'user'): ?>
+      <div class="cart-wrap" style="margin-left:10px;">
+        <a href="cart.php">
+          <button class="cart">
+            <i class="fa fa-shopping-bag"></i>
+          </button>
+        </a>
+
+        <?php if($cart_count > 0){ ?>
+          <span class="cart-badge">
+            <?php echo $cart_count; ?>
+          </span>
+        <?php } ?>
+      </div>
+    <?php endif; ?>
 
   </div>
 
-  <!-- 🔥 CART ICON (only for logged-in customers) -->
-  <?php if(isset($_SESSION['user_id']) && ($_SESSION['user_role'] ?? '') === 'user'): ?>
-    <div class="cart-wrap" style="margin-left:10px;">
-      <a href="cart.php">
-        <button class="cart">
-          <i class="fa fa-shopping-bag"></i>
-        </button>
-      </a>
-
-      <?php if($cart_count > 0){ ?>
-        <span class="cart-badge">
-          <?php echo $cart_count; ?>
-        </span>
-      <?php } ?>
-    </div>
-  <?php endif; ?>
-
-</div>
-
-      </div>
-    </div>
-
-  </nav>
+</nav>
 
   <header class="hero">
 
