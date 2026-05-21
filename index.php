@@ -122,6 +122,12 @@ $result_featured = mysqli_query($conn, $sql_featured);
       display: flex;
       gap: 10px;
       align-items: center;
+      margin-left: auto;
+      order: 3;
+    }
+
+    .cart-wrap{
+      order: 2;
     }
 
     .auth-btn{
@@ -744,6 +750,10 @@ $result_featured = mysqli_query($conn, $sql_featured);
           Welcome <?php echo $_SESSION['user_name']; ?>
       </span>
 
+      <?php if(($_SESSION['user_role'] ?? '') === 'user'): ?>
+        <a href="myorders.php" class="auth-btn login-btn">My Orders</a>
+      <?php endif; ?>
+
       <a href="logout.php" class="auth-btn signup-btn">Logout</a>
 
   <?php } else { ?>
@@ -755,20 +765,22 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   </div>
 
-  <!-- 🔥 CART ICON -->
-  <div class="cart-wrap">
-    <a href="cart.php">
-      <button class="cart">
-        <i class="fa fa-shopping-bag"></i>
-      </button>
-    </a>
+  <!-- 🔥 CART ICON (only for logged-in customers) -->
+  <?php if(isset($_SESSION['user_id']) && ($_SESSION['user_role'] ?? '') === 'user'): ?>
+    <div class="cart-wrap" style="margin-left:10px;">
+      <a href="cart.php">
+        <button class="cart">
+          <i class="fa fa-shopping-bag"></i>
+        </button>
+      </a>
 
-    <?php if($cart_count > 0){ ?>
-      <span class="cart-badge">
-        <?php echo $cart_count; ?>
-      </span>
-    <?php } ?>
-  </div>
+      <?php if($cart_count > 0){ ?>
+        <span class="cart-badge">
+          <?php echo $cart_count; ?>
+        </span>
+      <?php } ?>
+    </div>
+  <?php endif; ?>
 
 </div>
 
