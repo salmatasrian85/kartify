@@ -7,7 +7,11 @@ if(isset($_SESSION['user_id'])){
 
         $user_id = $_SESSION['user_id'];
 
-        $sql = "SELECT * FROM payments WHERE user_id = '$user_id'";
+        $sql = "SELECT single_order.*, payments.payment_method
+                FROM single_order
+                LEFT JOIN payments ON payments.order_id = single_order.id
+                WHERE single_order.user_id = '$user_id'
+                ORDER BY single_order.id DESC";
         $result = mysqli_query($conn,$sql);
 
         if(!$result){
@@ -150,6 +154,7 @@ tbody tr:hover{
         <div class="logo">KARTIFY</div>
 
         <a href="index.php">Shop</a>
+        <a href="cart.php">Cart</a>
         <a href="#">Profile</a>
         <a href="logout.php">Logout</a>
     </div>
@@ -170,25 +175,27 @@ tbody tr:hover{
 
             <div class="card">
 
-                <h3>Your Payment History</h3>
+                <h3>Your Orders</h3>
 
                 <table>
                     <thead>
                         <tr>
                             <th>Order ID</th>
-                            <th>User ID</th>
+                            <th>Product ID</th>
                             <th>Total Amount</th>
                             <th>Payment Method</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <?php while($row=mysqli_fetch_assoc($result)){ ?>
                         <tr>
-                            <td><?php echo $row['order_id'] ?></td>
-                            <td><?php echo $row['user_id']?></td>
+                            <td>#<?php echo $row['id'] ?></td>
+                            <td><?php echo $row['product_id']?></td>
                             <td>৳ <?php echo $row['total_amount']?></td>
-                            <td><?php echo $row['payment_method']?></td>
+                            <td><?php echo htmlspecialchars($row['payment_method'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars(ucfirst($row['status'] ?? 'pending')); ?></td>
                         </tr>
                         <?php } ?> 
                     </tbody>

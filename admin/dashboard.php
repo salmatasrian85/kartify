@@ -9,6 +9,27 @@ if(isset($_SESSION['user_id'])) {
 }else{
     header("Location: ../index.php");
 }
+
+include "../db.php";
+
+$stats = [
+    'products' => 0,
+    'orders' => 0,
+    'users' => 0,
+    'stock_products' => 0,
+];
+
+$result = mysqli_query($conn, "SELECT COUNT(*) AS total_products FROM products");
+if($result){ $row = mysqli_fetch_assoc($result); $stats['products'] = intval($row['total_products']); }
+
+$result = mysqli_query($conn, "SELECT COUNT(*) AS total_orders FROM single_order");
+if($result){ $row = mysqli_fetch_assoc($result); $stats['orders'] = intval($row['total_orders']); }
+
+$result = mysqli_query($conn, "SELECT COUNT(*) AS total_users FROM users");
+if($result){ $row = mysqli_fetch_assoc($result); $stats['users'] = intval($row['total_users']); }
+
+$result = mysqli_query($conn, "SELECT COUNT(*) AS total_stock_products FROM products WHERE stock > 0");
+if($result){ $row = mysqli_fetch_assoc($result); $stats['stock_products'] = intval($row['total_stock_products']); }
 ?>
 
 <!DOCTYPE html>
@@ -152,23 +173,23 @@ if(isset($_SESSION['user_id'])) {
             <div class="cards">
 
                 <div class="card">
-                    <h3>Products</h3>
-                    <p>Manage all products in your store.</p>
+                    <h3>Total Products</h3>
+                    <p><?php echo $stats['products']; ?> products are currently in your catalogue.</p>
                 </div>
 
                 <div class="card">
-                    <h3>Orders</h3>
-                    <p>View and manage customer orders.</p>
+                    <h3>Total Orders</h3>
+                    <p><?php echo $stats['orders']; ?> orders have been placed so far.</p>
                 </div>
 
                 <div class="card">
-                    <h3>Users</h3>
-                    <p>Manage registered users.</p>
+                    <h3>Total Users</h3>
+                    <p><?php echo $stats['users']; ?> users are registered in the system.</p>
                 </div>
 
                 <div class="card">
-                    <h3>Analytics</h3>
-                    <p>Track performance and sales.</p>
+                    <h3>In-Stock Products</h3>
+                    <p><?php echo $stats['stock_products']; ?> products currently have stock available.</p>
                 </div>
 
             </div>

@@ -5,6 +5,20 @@ session_start();
 // Connect to the database using the db.php file
 include "db.php";
 
+function ensure_single_order_customer_columns($conn) {
+    $columns = [
+        'customer_name' => 'VARCHAR(255) NULL',
+        'customer_email' => 'VARCHAR(255) NULL',
+    ];
+
+    foreach ($columns as $column => $definition) {
+        $check = mysqli_query($conn, "SHOW COLUMNS FROM single_order LIKE '$column'");
+        if (!$check || mysqli_num_rows($check) === 0) {
+            mysqli_query($conn, "ALTER TABLE single_order ADD COLUMN $column $definition");
+        }
+    }
+}
+
 // Check if the user is logged in. If they are not logged in, send them to login.php
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -26,6 +40,14 @@ if (isset($_GET['product_id'])) {
         // If no method is sent, set it to 'cashon' by default
         $payment_method = 'cashon';
     }
+
+    // Load the logged-in user's name and email for this order.
+    $user_result = mysqli_query($conn, "SELECT name, email FROM users WHERE id = '$user_id'");
+    $user_data = $user_result ? mysqli_fetch_assoc($user_result) : [];
+    $customer_name = mysqli_real_escape_string($conn, $user_data['name'] ?? '');
+    $customer_email = mysqli_real_escape_string($conn, $user_data['email'] ?? '');
+
+    ensure_single_order_customer_columns($conn);
 
     // Step 1: Ask the database for the price and stock of this product
     $query_product = "SELECT price, stock FROM products WHERE id = '$product_id'";
@@ -52,8 +74,8 @@ if (isset($_GET['product_id'])) {
     if ($payment_status == "success") {
 
         // Step 3: Insert a new record into the single_order table
-        $sql_order = "INSERT INTO single_order (user_id, product_id, total_amount)
-                      VALUES ('$user_id', '$product_id', '$price')";
+        $sql_order = "INSERT INTO single_order (user_id, product_id, total_amount, customer_name, customer_email)
+                      VALUES ('$user_id', '$product_id', '$price', '$customer_name', '$customer_email')";
 
         if (mysqli_query($conn, $sql_order)) {
 

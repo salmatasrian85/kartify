@@ -2,6 +2,12 @@
 session_start();
 include "db.php";
 
+/* CART COUNT */
+$cart_count = 0;
+if(isset($_SESSION['cart'])){
+    $cart_count = array_sum($_SESSION['cart']);
+}
+
 /* FETCH CATEGORIES */
 $sql_category = "SELECT * FROM categories";
 $result_category = mysqli_query($conn, $sql_category);
@@ -17,7 +23,7 @@ if(isset($_GET['category_name']) && $_GET['category_name'] != ""){
 
 $result = mysqli_query($conn, $sql);
 
-/* FEATURED PRODUCTS (latest 4) */
+/* FEATURED PRODUCTS */
 $sql_featured = "SELECT * FROM products ORDER BY id DESC LIMIT 4";
 $result_featured = mysqli_query($conn, $sql_featured);
 ?>
@@ -31,7 +37,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>KARTIFY — Contemporary Art Gallery</title>
+  <title>KARTIFY</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -60,7 +66,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
     }
 
     /* =========================
-       NAVBAR
+        NAVBAR
     ========================= */
 
     .nav{
@@ -158,8 +164,23 @@ $result_featured = mysqli_query($conn, $sql_featured);
       font-size: 16px;
     }
 
+    .cart-wrap{ position: relative; display: inline-block; }
+    .cart-badge{
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #e74c3c;
+      color: white;
+      font-size: 12px;
+      padding: 4px 7px;
+      border-radius: 20px;
+      line-height: 1;
+      min-width: 22px;
+      text-align: center;
+    }
+
     /* =========================
-       HERO
+        HERO
     ========================= */
 
     .hero{
@@ -234,7 +255,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
       gap: 30px;
     }
     /* =========================
-       TOP BROWSE SECTION
+        TOP BROWSE SECTION
     ========================= */
 
     .browse-top{
@@ -271,26 +292,68 @@ $result_featured = mysqli_query($conn, $sql_featured);
     }
 
     /* =========================
-       FILTERS
+        FILTERS
     ========================= */
 
     .filters{
       display: flex;
       gap: 14px;
       flex-wrap: wrap;
+      align-items: center;
       padding: 25px 40px;
       border-bottom: 1px solid #ece7df;
     }
 
+    .filters .filter-label{
+      font-size: 24px;
+      font-weight: 500;
+      margin-right: 16px;
+      color: #222;
+    }
+
     .filters button{
       padding: 10px 18px;
-      border-radius: 30px;
+      border-radius: 4px;
       border: 1px solid #111;
       background: transparent;
       cursor: pointer;
       transition: 0.3s;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
+    .cart-wrap{
+  position: relative;
+  display: inline-block;
+}
+
+.cart-badge{
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #e74c3c;
+  color: white;
+  font-size: 12px;
+  padding: 4px 7px;
+  border-radius: 20px;
+  min-width: 22px;
+  text-align: center;
+}
+
+
+.cart:hover{
+  transform: scale(1.1);
+}
+
+.cart-badge{
+  animation: pop 0.3s ease;
+}
+
+@keyframes pop{
+  0%{ transform: scale(0); }
+  100%{ transform: scale(1); }
+}
 
     .filters button:hover{
       background: #111;
@@ -303,7 +366,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
     }
 
     /* =========================
-       GALLERY GRID
+        GALLERY GRID
     ========================= */
 
     .grid{
@@ -365,7 +428,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
     }
 
     /* =========================
-       NEWSLETTER
+        NEWSLETTER
     ========================= */
 
     .newsletter{
@@ -458,7 +521,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
     }
 
     /* =========================
-       FOOTER
+        FOOTER
     ========================= */
 
     .footer{
@@ -538,7 +601,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
     }
 
     /* =========================
-       RESPONSIVE
+        RESPONSIVE
     ========================= */
 
     @media(max-width:992px){
@@ -636,6 +699,14 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
       .filters{
         padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+
+      .filters .filter-label{
+        margin-right: 0;
+        margin-bottom: 5px;
       }
 
       .browse-section{
@@ -650,8 +721,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
 <body>
 
-  <!-- NAVBAR -->
-   <nav class="nav">
+  <nav class="nav">
 
     <h1 class="logo serif">KARTIFY</h1>
 
@@ -664,34 +734,49 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
     <div class="nav-right">
 
-      <input type="text" placeholder="Search arts or works">
+  <input type="text" placeholder="Search arts or works">
 
-      <!--  LOGIN + SIGNUP BUTTONS -->
-      <div class="auth-links">
+  <div class="auth-links">
 
-      <?php if(isset($_SESSION['user_id'])){ ?>
+  <?php if(isset($_SESSION['user_id'])){ ?>
 
-          <!-- LOGGED IN USER -->
-          <span style="font-size:14px;">
-              Welcome <?php echo $_SESSION['user_name']; ?>
-          </span>
+      <span style="font-size:14px;">
+          Welcome <?php echo $_SESSION['user_name']; ?>
+      </span>
 
-          <a href="logout.php" class="auth-btn signup-btn">Logout</a>
+      <a href="logout.php" class="auth-btn signup-btn">Logout</a>
 
-      <?php } else { ?>
+  <?php } else { ?>
 
-          <!-- NOT LOGGED IN -->
-          <a href="login.php" class="auth-btn login-btn">Login</a>
-          <a href="register.php" class="auth-btn signup-btn">Signup</a>
+      <a href="login.php" class="auth-btn login-btn">Login</a>
+      <a href="register.php" class="auth-btn signup-btn">Signup</a>
 
-      <?php } ?>
+  <?php } ?>
+
+  </div>
+
+  <!-- 🔥 CART ICON -->
+  <div class="cart-wrap">
+    <a href="cart.php">
+      <button class="cart">
+        <i class="fa fa-shopping-bag"></i>
+      </button>
+    </a>
+
+    <?php if($cart_count > 0){ ?>
+      <span class="cart-badge">
+        <?php echo $cart_count; ?>
+      </span>
+    <?php } ?>
+  </div>
+
+</div>
 
       </div>
     </div>
 
   </nav>
 
-  <!-- HERO -->
   <header class="hero">
 
     <div class="hero-content">
@@ -714,8 +799,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
     </div>
     
   </header>
-  <!-- FEATURED PRODUCTS -->
-<section class="featured">
+  <section class="featured">
 
   <h2 class="serif">Featured Works</h2>
 
@@ -741,9 +825,11 @@ $result_featured = mysqli_query($conn, $sql_featured);
             ৳ <?php echo $f['price']; ?>
           </span>
 
-          <a href="singleorder.php?product_id=<?php echo $f['id']; ?>" class="buy-btn">
-            Buy Now
-          </a>
+          <?php if(isset($f['stock']) && $f['stock'] <= 0){ ?>
+            <span class="buy-btn" style="background:#888;cursor:not-allowed;">Out of Stock</span>
+          <?php } else { ?>
+            <a href="add_to_cart.php?product_id=<?php echo $f['id']; ?>" class="buy-btn">Add to Cart</a>
+          <?php } ?>
 
         </div>
 
@@ -757,14 +843,14 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   <section class="filters">
 
-  <!-- ALL BUTTON -->
+  <span class="filter-label">Shop by Category</span>
+
   <a href="?#filters">
   <button class="<?php if(!isset($_GET['category_name'])) echo 'active'; ?>">
     All
   </button>
 </a>
 
-  <!-- DYNAMIC CATEGORY BUTTONS -->
   <?php while($row_category = mysqli_fetch_assoc($result_category)){ ?>
 
     <a href="index.php?category_name=<?php echo urlencode($row_category['name']); ?>">
@@ -782,7 +868,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
 </section>
 
-  <!-- PRODUCT GRID -->
   <main class="grid">
 
     <?php while($row = mysqli_fetch_assoc($result)){ ?>
@@ -808,9 +893,11 @@ $result_featured = mysqli_query($conn, $sql_featured);
             Tk. <?php echo $row['price']; ?>
           </span>
 
-          <a href="singleorder.php?product_id=<?php echo $row['id']; ?>" class="buy-btn">
-            Buy Now
-          </a>
+          <?php if(isset($row['stock']) && $row['stock'] <= 0){ ?>
+            <span class="buy-btn" style="background:#888;cursor:not-allowed;">Out of Stock</span>
+          <?php } else { ?>
+            <a href="add_to_cart.php?product_id=<?php echo $row['id']; ?>" class="buy-btn">Add to Cart</a>
+          <?php } ?>
 
         </div>
 
@@ -820,7 +907,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   </main>
 
-  <!-- NEWSLETTER -->
   <section class="newsletter">
 
     <div class="newsletter-left">
@@ -862,14 +948,12 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   </section>
 
-  <!-- FOOTER -->
   <footer class="footer">
 
     <div class="footer-container">
 
       <div class="footer-top">
 
-        <!-- LOGO -->
         <div>
 
           <h2 class="footer-logo serif">
@@ -883,7 +967,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
         </div>
 
-        <!-- CONTACT -->
         <div>
 
           <h3 class="serif">GET IN TOUCH</h3>
@@ -903,7 +986,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
         </div>
 
-        <!-- DISCOVER -->
         <div>
 
           <h3 class="serif">DISCOVER</h3>
@@ -917,31 +999,3 @@ $result_featured = mysqli_query($conn, $sql_featured);
           </ul>
 
         </div>
-
-        <!-- ABOUT -->
-        <div>
-
-          <h3 class="serif">ABOUT</h3>
-
-          <ul>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">Testimonials</a></li>
-            <li><a href="#">Shipping & Delivery</a></li>
-            <li><a href="#">Commission Artwork</a></li>
-          </ul>
-
-        </div>
-
-      </div>
-
-      <div class="footer-bottom">
-        © 2026 KARTIFY — Contemporary Art Gallery
-      </div>
-
-    </div>
-
-  </footer>
-
-</body>
-</html>

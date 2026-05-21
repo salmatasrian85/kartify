@@ -140,6 +140,7 @@ td{
     color:white;
 }
 .pending{ background:orange; }
+.delivered,
 .completed{ background:green; }
 .cancelled{ background:red; }
 
@@ -190,6 +191,10 @@ td{
                     <div class="success">Order deleted successfully!</div>
                 <?php } ?>
 
+                <?php if($_GET['msg'] == "updated"){ ?>
+                    <div class="success">Order status updated successfully!</div>
+                <?php } ?>
+
                 <?php if($_GET['msg'] == "error"){ ?>
                     <div class="error">Something went wrong!</div>
                 <?php } ?>
@@ -237,7 +242,6 @@ td{
                         <td><?php echo $row['created_at']; ?></td>
 
                         <td class="action">
-                            <a class="view" href="view_single_order.php?id=<?php echo $row['id']; ?>">View</a>
                             <a class="update" href="update_status.php?id=<?php echo $row['id']; ?>">Update</a>
                             <a class="delete" href="delete_order.php?id=<?php echo $row['id']; ?>" onclick="return confirm('Delete this order?')">Delete</a>
                         </td>
