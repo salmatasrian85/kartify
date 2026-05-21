@@ -347,6 +347,23 @@ $result_featured = mysqli_query($conn, $sql_featured);
       font-weight: 700;
     }
 
+    .buy-btn{
+      display: inline-block;
+      margin-top: 14px;
+      padding: 12px 20px;
+      border-radius: 30px;
+      background: #111;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .buy-btn:hover{
+      background: #333;
+    }
+
     /* =========================
        NEWSLETTER
     ========================= */
@@ -724,6 +741,10 @@ $result_featured = mysqli_query($conn, $sql_featured);
             ৳ <?php echo $f['price']; ?>
           </span>
 
+          <a href="singleorder.php?product_id=<?php echo $f['id']; ?>" class="buy-btn">
+            Buy Now
+          </a>
+
         </div>
 
       </div>
@@ -786,6 +807,10 @@ $result_featured = mysqli_query($conn, $sql_featured);
           <span class="price">
             Tk. <?php echo $row['price']; ?>
           </span>
+
+          <a href="singleorder.php?product_id=<?php echo $row['id']; ?>" class="buy-btn">
+            Buy Now
+          </a>
 
         </div>
 
