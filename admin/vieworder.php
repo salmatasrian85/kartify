@@ -166,11 +166,12 @@ td{
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="logo">KARTIFY</div>
-
         <a href="dashboard.php">Dashboard</a>
         <a href="addproduct.php">Add Product</a>
         <a href="displayproduct.php">Manage Products</a>
-        <a href="vieworder.php">Orders</a>
+        <a href="manage_users.php">Manage Users</a>
+        <a class="active" href="vieworder.php">Orders</a>
+        <a href="admin_profile.php">Profile</a>
         <a href="../logout.php">Logout</a>
     </div>
 

@@ -47,6 +47,7 @@ body{ background:#f5f6fa; }
         <a href="displayproduct.php">Manage Products</a>
         <a class="active" href="manage_users.php">Manage Users</a>
         <a href="vieworder.php">Orders</a>
+        <a href="admin_profile.php">Profile</a>
         <a href="../logout.php">Logout</a>
     </div>
     <div class="main">

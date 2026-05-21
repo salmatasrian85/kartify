@@ -90,7 +90,6 @@ body{ background:#f5f6fa; }
         </div>
         <div class="content">
             <div class="card">
-                <a class="back-link" href="dashboard.php">← Back to Dashboard</a>
                 <h2>Profile Settings</h2>
                 <?php if($msg): ?>
                     <div class="<?php echo strpos($msg, 'Error') === 0 ? 'error' : 'success'; ?>"><?php echo htmlspecialchars($msg); ?></div>
