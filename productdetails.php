@@ -61,7 +61,6 @@ $p = mysqli_fetch_assoc($res);
           <?php else: ?>
             <span class="btn secondary" style="opacity:0.6;cursor:not-allowed;">Out of Stock</span>
           <?php endif; ?>
-          <a href="cart.php" class="btn secondary">View Cart</a>
         </div>
       </div>
     </div>

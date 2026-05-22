@@ -953,43 +953,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   </main>
 
-  <section class="newsletter">
-
-    <div class="newsletter-left">
-
-      <h2 class="serif">
-        Join our community
-      </h2>
-
-      <p>
-        Receive curated updates on new collections,
-        featured artists and exclusive artwork releases
-        from KARTIFY Contemporary Art Gallery.
-      </p>
-
-    </div>
-
-    <div class="newsletter-right">
-
-      <div class="newsletter-form">
-
-        <input type="text" placeholder="Full Name*">
-
-        <input type="email" placeholder="Email Address*">
-
-        <button>SUBSCRIBE</button>
-
-      </div>
-
-      <div class="social-icons">
-
-        <a href="#"><i class="fab fa-facebook-f"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-youtube"></i></a>
-
-      </div>
-
     </div>
 
   </section>
@@ -1037,7 +1000,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
           <h3 class="serif">DISCOVER</h3>
 
           <ul>
-            <li><a href="#">Art & Artists</a></li>
+            <li><a href="#">Arts </a></li>
             <li><a href="#">Exhibitions</a></li>
             <li><a href="#">Paintings</a></li>
             <li><a href="#">Sculptures</a></li>

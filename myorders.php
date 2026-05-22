@@ -154,7 +154,6 @@ tbody tr:hover{
                     <thead>
                         <tr>
                             <th>Order ID</th>
-                            <th>Product ID</th>
                             <th>Total Amount</th>
                             <th>Payment Method</th>
                             <th>Status</th>
@@ -165,7 +164,6 @@ tbody tr:hover{
                         <?php while($row=mysqli_fetch_assoc($result)){ ?>
                         <tr>
                             <td>#<?php echo $row['id'] ?></td>
-                            <td><?php echo $row['product_id']?></td>
                             <td>৳ <?php echo $row['total_amount']?></td>
                             <td><?php echo htmlspecialchars($row['payment_method'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars(ucfirst($row['status'] ?? 'pending')); ?></td>
