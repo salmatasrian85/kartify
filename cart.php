@@ -262,20 +262,6 @@ body { background:#f8f8f8; color:#1a1a1a; }
                 </tbody>
             </table>
 
-            <div class="summary">
-                <div class="summary-card">
-                    <h2>Order Summary</h2>
-                    <div class="summary-item">
-                        <span>Items total</span>
-                        <span>৳ <?php echo number_format($total_amount, 2); ?></span>
-                    </div>
-                    <div class="summary-item total">
-                        <span>Total</span>
-                        <span>৳ <?php echo number_format($total_amount, 2); ?></span>
-                    </div>
-                    <button type="submit" name="update_qty" class="btn" style="margin-top:10px;">Update Quantities</button>
-                </div>
-
                 <div class="checkout-card">
                     <h2>Checkout</h2>
                     <div class="method-group">

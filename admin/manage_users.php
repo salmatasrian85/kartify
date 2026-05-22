@@ -35,7 +35,6 @@ body{ background:#f5f6fa; }
 .edit{ background:#111; color:#fff; }
 .delete{ background:#e74c3c; color:#fff; }
 .add{ background:#111; color:#fff; padding:8px 12px; text-decoration:none; border-radius:6px; }
-.back-dashboard{ background:#555; color:#fff; padding:8px 12px; text-decoration:none; border-radius:6px; }
 </style>
 </head>
 <body>
@@ -56,10 +55,6 @@ body{ background:#f5f6fa; }
             <div>Admin Panel</div>
         </div>
         <div class="content">
-            <div class="toolbar">
-                <a class="back-dashboard" href="dashboard.php">← Back to Dashboard</a>
-                <a class="add" href="edit_user.php">Add New User</a>
-            </div>
             <table class="table">
         <thead>
             <tr>

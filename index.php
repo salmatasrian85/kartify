@@ -13,12 +13,24 @@ $sql_category = "SELECT * FROM categories";
 $result_category = mysqli_query($conn, $sql_category);
 
 /* DEFAULT PRODUCTS */
+$search = '';
 $sql = "SELECT * FROM products";
+$where = [];
 
 /* CATEGORY FILTER */
 if(isset($_GET['category_name']) && $_GET['category_name'] != ""){
     $category_name = mysqli_real_escape_string($conn, $_GET['category_name']);
-    $sql = "SELECT * FROM products WHERE category_name = '$category_name'";
+    $where[] = "category_name = '$category_name'";
+}
+
+/* SEARCH FILTER */
+if(isset($_GET['search']) && trim($_GET['search']) != ""){
+    $search = mysqli_real_escape_string($conn, trim($_GET['search']));
+    $where[] = "(name LIKE '%$search%' OR description LIKE '%$search%' OR category_name LIKE '%$search%')";
+}
+
+if(count($where) > 0){
+    $sql = "SELECT * FROM products WHERE " . implode(' AND ', $where);
 }
 
 $result = mysqli_query($conn, $sql);
@@ -108,6 +120,41 @@ $result_featured = mysqli_query($conn, $sql_featured);
       display: flex;
       align-items: center;
       gap: 18px;
+    }
+
+    .nav-search{
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 0 20px;
+    }
+
+    .nav-search form{
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+    }
+
+    .nav-search input{
+      width: 100%;
+      padding: 10px 18px;
+      border-radius: 30px;
+      border: 1px solid #ddd;
+      background: white;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .nav-search button{
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #111;
+      cursor: pointer;
+      font-size: 16px;
     }
 
     .nav-right input{
@@ -274,42 +321,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
       justify-content: center;
       gap: 30px;
     }
-    /* =========================
-        TOP BROWSE SECTION
-    ========================= */
-
-    .browse-top{
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 40px;
-    }
-
-    .browse-top input{
-      flex: 1;
-      border: none;
-      border-bottom: 2px solid #111;
-      background: transparent;
-      padding: 14px 0;
-      outline: none;
-      font-size: 15px;
-    }
-
-    .browse-top button{
-      background: #111;
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      cursor: pointer;
-      font-size: 11px;
-      letter-spacing: 1px;
-    }
-
-    .browse-title h2{
-      font-size: 76px;
-      letter-spacing: 2px;
-      margin-bottom: 30px;
-    }
 
     /* =========================
         FILTERS
@@ -391,7 +402,8 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
     .grid{
       display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(290px,1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 300px));
+      justify-content: center;
       gap: 35px;
       padding: 50px 40px;
     }
@@ -440,6 +452,20 @@ $result_featured = mysqli_query($conn, $sql_featured);
       text-decoration: none;
       font-size: 14px;
       font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .details-btn{
+      display: inline-block;
+      margin-top: 14px;
+      padding: 12px 20px;
+      border-radius: 30px;
+      background: transparent;
+      color: #111;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid #111;
       transition: 0.3s;
     }
 
@@ -638,9 +664,7 @@ $result_featured = mysqli_query($conn, $sql_featured);
         font-size: 56px;
       }
 
-      .browse-title h2{
-        font-size: 56px;
-      }
+  
 
     }
 
@@ -745,11 +769,11 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
   <h1 class="logo serif">KARTIFY</h1>
 
-  <div class="nav-links">
-    <a href="#">Gallery</a>
-    <a href="#">Arts</a>
-    <a href="#">Exhibitions</a>
-    <a href="#">Store</a>
+  <div class="nav-search">
+    <form action="index.php" method="get">
+      <input type="text" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search); ?>">
+      <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
   </div>
 
   <div class="nav-right">
@@ -757,10 +781,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
     <?php if(isset($_SESSION['user_id'])){ ?>
 
       <div class="auth-links">
-
-        <span style="font-size:14px;">
-          Welcome <?php echo $_SESSION['user_name']; ?>
-        </span>
 
         <a href="profile.php" class="profile-icon" title="Profile">
           <?php echo strtoupper(substr($_SESSION['user_name'],0,1)); ?>
@@ -807,8 +827,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
     <div class="hero-content">
 
-      <span class="badge">LIMITED COLLECTION 2026</span>
-
       <h2 class="serif">
         Art that speaks <br>
         to the soul.
@@ -817,10 +835,6 @@ $result_featured = mysqli_query($conn, $sql_featured);
       <p>
         Welcome to our art shop—a space where creativity comes to life. From vibrant paintings to handcrafted pieces, every item here tells a story. Whether you're an art lover, a collector, or simply exploring, we invite you to discover inspiration in every corner.
       </p>
-
-      <button class="btn">
-        Browse Collection →
-      </button>
 
     </div>
     
@@ -848,13 +862,16 @@ $result_featured = mysqli_query($conn, $sql_featured);
           </p>
 
           <span class="price">
-            ৳ <?php echo $f['price']; ?>
+            Tk. <?php echo $f['price']; ?>
           </span>
 
           <?php if(isset($f['stock']) && $f['stock'] <= 0){ ?>
             <span class="buy-btn" style="background:#888;cursor:not-allowed;">Out of Stock</span>
           <?php } else { ?>
-            <a href="add_to_cart.php?product_id=<?php echo $f['id']; ?>" class="buy-btn">Add to Cart</a>
+            <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+              <a href="add_to_cart.php?product_id=<?php echo $f['id']; ?>" class="buy-btn">Add to Cart</a>
+              <a href="productdetails.php?product_id=<?php echo $f['id']; ?>" class="details-btn">Product Details</a>
+            </div>
           <?php } ?>
 
         </div>
@@ -922,7 +939,10 @@ $result_featured = mysqli_query($conn, $sql_featured);
           <?php if(isset($row['stock']) && $row['stock'] <= 0){ ?>
             <span class="buy-btn" style="background:#888;cursor:not-allowed;">Out of Stock</span>
           <?php } else { ?>
-            <a href="add_to_cart.php?product_id=<?php echo $row['id']; ?>" class="buy-btn">Add to Cart</a>
+            <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+              <a href="add_to_cart.php?product_id=<?php echo $row['id']; ?>" class="buy-btn">Add to Cart</a>
+              <a href="productdetails.php?product_id=<?php echo $row['id']; ?>" class="details-btn">Product Details</a>
+            </div>
           <?php } ?>
 
         </div>
