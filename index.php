@@ -646,6 +646,47 @@ $result_featured = mysqli_query($conn, $sql_featured);
       letter-spacing: 1px;
     }
 
+    .profile-dropdown{
+      position: relative;
+      cursor: pointer;
+    }
+
+    .dropdown-menu{
+      position: absolute;
+      top: 120%;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 170px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    .dropdown-menu a{
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    .dropdown-menu a:hover{
+      background: #f5f5f5;
+    }
+
+    .dropdown-menu .logout{
+      color: #e74c3c;
+      font-weight: 600;
+    }
+
+    .profile-dropdown.active .dropdown-menu{
+      display: flex;
+    }
+
     /* =========================
         RESPONSIVE
     ========================= */
@@ -668,100 +709,27 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
     }
 
-    @media(max-width:768px){
-
-      .nav{
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .nav-links{
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-
-      .hero{
-        height: 70vh;
-      }
-
-      .hero-content{
-        padding: 0 25px;
-      }
-
-      .hero h2{
-        font-size: 42px;
-      }
-
-      .browse-top{
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .browse-title h2{
-        font-size: 42px;
-      }
-
-      .newsletter{
-        padding: 60px 25px;
-      }
-
-      .newsletter-form{
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .newsletter-form input,
-      .newsletter-form button{
-        width: 100%;
-      }
-
-      .newsletter-right{
-        width: 100%;
-        align-items: flex-start;
-      }
-
-      .footer{
-        padding: 50px 25px 35px;
-      }
-
-      .footer-top{
-        grid-template-columns: 1fr;
-        gap: 50px;
-      }
-
-      .footer-logo{
-        font-size: 42px;
-      }
-
-      .grid{
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(290px, 300px));
-        justify-content: center; /* 🔥 important */
-        gap: 35px;
-        padding: 50px 40px;
-      }
-
-      .filters{
-        padding: 20px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 20px;
-      }
-
-      .filters .filter-label{
-        margin-right: 0;
-        margin-bottom: 5px;
-      }
-
-      .browse-section{
-        padding: 35px 20px 15px;
-      }
-
-    }
-
   </style>
 
 </head>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  const profile = document.querySelector(".profile-dropdown");
+
+  if(profile){
+    profile.addEventListener("click", function(e){
+      e.stopPropagation();
+      profile.classList.toggle("active");
+    });
+
+    document.addEventListener("click", function(){
+      profile.classList.remove("active");
+    });
+  }
+
+});
+</script>
 
 <body>
 
@@ -782,15 +750,27 @@ $result_featured = mysqli_query($conn, $sql_featured);
 
       <div class="auth-links">
 
-        <a href="profile.php" class="profile-icon" title="Profile">
-          <?php echo strtoupper(substr($_SESSION['user_name'],0,1)); ?>
-        </a>
+        <div class="profile-dropdown">
 
-        <?php if(($_SESSION['user_role'] ?? '') === 'user'): ?>
-          <a href="myorders.php" class="auth-btn login-btn">My Orders</a>
-        <?php endif; ?>
+          <!-- Profile Icon -->
+          <div class="profile-icon dropdown-toggle">
+            <?php echo strtoupper(substr($_SESSION['user_name'],0,1)); ?>
+          </div>
 
-        <a href="logout.php" class="auth-btn signup-btn">Logout</a>
+          <!-- Dropdown Menu -->
+          <div class="dropdown-menu">
+
+            <a href="profile.php">View Profile</a>
+
+            <?php if(($_SESSION['user_role'] ?? '') === 'user'): ?>
+              <a href="myorders.php">Orders</a>
+            <?php endif; ?>
+
+            <a href="logout.php" class="logout">Log Out</a>
+
+          </div>
+
+        </div>
 
       </div>
 

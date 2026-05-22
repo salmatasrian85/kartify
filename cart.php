@@ -268,12 +268,12 @@ body { background:#f8f8f8; color:#1a1a1a; }
                     <?php foreach ($cart_items as $item): ?>
                         <div class="summary-item">
                             <span><?php echo htmlspecialchars($item['name']); ?> x <?php echo intval($item['quantity']); ?></span>
-                            <span>৳ <?php echo number_format($item['subtotal'], 2); ?></span>
+                            <span>Tk. <?php echo number_format($item['subtotal'], 2); ?></span>
                         </div>
                     <?php endforeach; ?>
                     <div class="summary-item total">
                         <span>Total</span>
-                        <span>৳ <?php echo number_format($total_amount, 2); ?></span>
+                        <span>Tk. <?php echo number_format($total_amount, 2); ?></span>
                     </div>
                     <div style="margin-top:12px;">
                         <button type="submit" name="update_qty" class="btn" style="width:auto; padding:10px 14px; background:#666;">Update Cart</button>
