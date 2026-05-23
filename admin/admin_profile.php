@@ -2,119 +2,316 @@
 session_start();
 include "../db.php";
 
-if(!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin'){
-    header('Location: ../index.php');
+$msg = "";
+
+if(isset($_SESSION['user_id'])){
+
+    if($_SESSION['user_role'] == "admin"){
+
+        $user_id = intval($_SESSION['user_id']);
+
+        // ================= UPDATE PROFILE =================
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+
+            $name = mysqli_real_escape_string($conn, $_POST['name']);
+            $email = mysqli_real_escape_string($conn, $_POST['email']);
+            $phone = mysqli_real_escape_string($conn, $_POST['phone']);
+            $address = mysqli_real_escape_string($conn, $_POST['address']);
+
+            $current_password = trim($_POST['current_password'] ?? '');
+            $new_password = trim($_POST['new_password'] ?? '');
+            $confirm_password = trim($_POST['confirm_password'] ?? '');
+
+            // ================= GET CURRENT PASSWORD =================
+            $storedRes = mysqli_query($conn, "SELECT password FROM users WHERE id='$user_id'");
+            $storedUser = mysqli_fetch_assoc($storedRes);
+
+            $stored_password = $storedUser['password'];
+
+            // ================= CHECK EMAIL =================
+            $checkSql = "SELECT id FROM users 
+                         WHERE email='$email' 
+                         AND id != '$user_id'";
+
+            $checkRes = mysqli_query($conn, $checkSql);
+
+            if(mysqli_num_rows($checkRes) > 0){
+
+                $msg = "Email already exists!";
+
+            } else {
+
+                $passwordSql = "";
+
+                // ================= PASSWORD CHANGE =================
+                if(
+                    !empty($current_password) ||
+                    !empty($new_password) ||
+                    !empty($confirm_password)
+                ){
+
+                    if(empty($current_password)){
+
+                        $msg = "Enter current password!";
+
+                    } elseif($current_password != $stored_password){
+
+                        $msg = "Current password incorrect!";
+
+                    } elseif(empty($new_password)){
+
+                        $msg = "Enter new password!";
+
+                    } elseif($new_password != $confirm_password){
+
+                        $msg = "Passwords do not match!";
+
+                    } else {
+
+                        $passwordSql = ", password='$new_password'";
+                    }
+                }
+
+                // ================= UPDATE QUERY =================
+                if(empty($msg)){
+
+                    $sql = "UPDATE users SET
+                            name='$name',
+                            email='$email',
+                            phone='$phone',
+                            address='$address'
+                            $passwordSql
+                            WHERE id='$user_id'";
+
+                    $result = mysqli_query($conn, $sql);
+
+                    if(!$result){
+
+                        $msg = "Error!: {$conn->error}";
+
+                    } else {
+
+                        $msg = "Profile updated successfully!";
+                    }
+                }
+            }
+        }
+
+        // ================= FETCH USER =================
+        $sql_user = "SELECT * FROM users WHERE id='$user_id'";
+        $result_user = mysqli_query($conn, $sql_user);
+
+        $user = mysqli_fetch_assoc($result_user);
+
+    } else {
+
+        echo "go for user dashboard";
+        exit();
+    }
+
+} else {
+
+    header("Location: ../index.php");
     exit();
 }
-
-$msg = "";
-$user_id = intval($_SESSION['user_id']);
-
-// If saving profile updates
-if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $phone = mysqli_real_escape_string($conn, $_POST['phone']);
-    $address = mysqli_real_escape_string($conn, $_POST['address']);
-    $password = $_POST['password'];
-
-    // Check email uniqueness for other users
-    $checkSql = "SELECT id FROM users WHERE email='$email' AND id != '$user_id'";
-    $checkRes = mysqli_query($conn, $checkSql);
-    if(mysqli_num_rows($checkRes) > 0){
-        $msg = "Email already in use.";
-    } else {
-        if(trim($password) !== ''){
-            $password = mysqli_real_escape_string($conn, $password);
-            $sql = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address', password='$password' WHERE id='$user_id'";
-        } else {
-            $sql = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address' WHERE id='$user_id'";
-        }
-
-        if(mysqli_query($conn, $sql)){
-            $msg = 'Profile updated successfully.';
-        } else {
-            $msg = 'DB Error: ' . $conn->error;
-        }
-    }
-}
-
-// Load current admin data
-$user = ['id'=>$user_id,'name'=>'','email'=>'','phone'=>'','address'=>'','role'=>'admin'];
-$res = mysqli_query($conn, "SELECT * FROM users WHERE id='$user_id'");
-if($res && mysqli_num_rows($res) > 0){ $user = mysqli_fetch_assoc($res); }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>Admin Profile</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-*{ margin:0; padding:0; box-sizing:border-box; font-family:Inter, sans-serif; }
-body{ background:#f5f6fa; }
-.container{ display:flex; }
-.sidebar{ width:240px; height:100vh; background:#111; color:white; padding:30px; position:fixed; }
-.logo{ font-size:24px; margin-bottom:40px; letter-spacing:2px; }
-.sidebar a{ display:block; color:#bbb; text-decoration:none; margin:15px 0; transition:0.3s; }
-.sidebar a:hover, .sidebar a.active{ color:white; }
-.main{ margin-left:240px; width:100%; background:#f5f6fa; min-height:100vh; }
-.header{ padding:20px 30px; background:white; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
-.header h2{ font-size:20px; }
-.content{ padding:30px; }
-.card{ background:#fff; padding:20px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); max-width:640px; }
-.input{ width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px; }
-.btn{ padding:10px 16px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-.back-link{ display:inline-block; margin-bottom:18px; color:#111; text-decoration:none; }
-.success{ margin-bottom:12px; color:#155724; background:#d4edda; padding:10px 12px; border-radius:6px; }
-.error{ margin-bottom:12px; color:#721c24; background:#f8d7da; padding:10px 12px; border-radius:6px; }
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Inter", sans-serif;
+}
+
+.container{
+    display:flex;
+}
+
+.sidebar{
+    width:240px;
+    height:100vh;
+    background:#111;
+    color:white;
+    padding:30px;
+    position:fixed;
+}
+
+.logo{
+    font-size:24px;
+    margin-bottom:40px;
+    letter-spacing:2px;
+}
+
+.sidebar a{
+    display:block;
+    color:#bbb;
+    text-decoration:none;
+    margin:15px 0;
+}
+
+.sidebar a:hover{
+    color:white;
+}
+
+.main{
+    margin-left:240px;
+    width:100%;
+    background:#f5f6fa;
+    min-height:100vh;
+}
+
+.header{
+    padding:20px 30px;
+    background:white;
+    display:flex;
+    justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+.content{
+    padding:30px;
+    display:flex;
+    justify-content:center;
+}
+
+.form-box{
+    background:white;
+    padding:35px;
+    width:500px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+input, textarea{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
+
+.btn{
+    width:100%;
+    padding:12px;
+    background:#111;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.msg{
+    margin-bottom:15px;
+    color:green;
+    font-weight:500;
+}
+
 </style>
 </head>
+
 <body>
+
 <div class="container">
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
+
         <div class="logo">KARTIFY</div>
+
         <a href="dashboard.php">Dashboard</a>
         <a href="addproduct.php">Add Product</a>
         <a href="displayproduct.php">Manage Products</a>
         <a href="manage_users.php">Manage Users</a>
         <a href="vieworder.php">Orders</a>
-        <a href="admin_profile.php" class="active">Profile</a>
+        <a href="admin_profile.php">Profile</a>
         <a href="../logout.php">Logout</a>
+
     </div>
+
+    <!-- MAIN -->
     <div class="main">
+
         <div class="header">
+
             <h2>Admin Profile</h2>
+
             <div>Admin Panel</div>
+
         </div>
+
         <div class="content">
-            <div class="card">
-                <h2>Profile Settings</h2>
-                <?php if($msg): ?>
-                    <div class="<?php echo strpos($msg, 'Error') === 0 ? 'error' : 'success'; ?>"><?php echo htmlspecialchars($msg); ?></div>
-                <?php endif; ?>
+
+            <div class="form-box">
+
+                <h2 style="margin-bottom:20px;">Profile Settings</h2>
+
+                <!-- MESSAGE -->
+                <?php if(!empty($msg)){ ?>
+                    <div class="msg">
+                        <?php echo $msg; ?>
+                    </div>
+                <?php } ?>
+
                 <form method="post">
+
                     <label>Full Name</label>
-                    <input class="input" type="text" name="name" required value="<?php echo htmlspecialchars($user['name']); ?>">
+                    <input 
+                        type="text" 
+                        name="name"
+                        value="<?php echo htmlspecialchars($user['name']); ?>"
+                        required
+                    >
 
                     <label>Email</label>
-                    <input class="input" type="email" name="email" required value="<?php echo htmlspecialchars($user['email']); ?>">
+                    <input 
+                        type="email"
+                        name="email"
+                        value="<?php echo htmlspecialchars($user['email']); ?>"
+                        required
+                    >
 
                     <label>Phone</label>
-                    <input class="input" type="text" name="phone" value="<?php echo htmlspecialchars($user['phone']); ?>">
+                    <input 
+                        type="text"
+                        name="phone"
+                        value="<?php echo htmlspecialchars($user['phone']); ?>"
+                    >
 
                     <label>Address</label>
-                    <textarea class="input" name="address"><?php echo htmlspecialchars($user['address']); ?></textarea>
+                    <textarea name="address"><?php echo htmlspecialchars($user['address']); ?></textarea>
 
-                    <label>Password (leave blank to keep current)</label>
-                    <input class="input" type="password" name="password">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password">
 
-                    <button class="btn" type="submit">Save Changes</button>
+                    <label>New Password</label>
+                    <input type="password" name="new_password">
+
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password">
+
+                    <button class="btn" type="submit">
+                        Save Changes
+                    </button>
+
                 </form>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
+
 </body>
 </html>

@@ -165,7 +165,6 @@ if($result){ $row = mysqli_fetch_assoc($result); $stats['stock_products'] = intv
         <div class="header">
             <h2>Admin Dashboard</h2>
             <div class="user">
-                Welcome, <?php echo $_SESSION['user_name']; ?>
                 <a href="admin_profile.php" style="margin-left:12px;display:inline-block;text-decoration:none;">
                     <span style="display:inline-block;width:34px;height:34px;border-radius:50%;background:#111;color:#fff;text-align:center;line-height:34px;font-weight:600;"><?php echo strtoupper(substr($_SESSION['user_name'],0,1)); ?></span>
                 </a>

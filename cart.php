@@ -6,6 +6,7 @@ function ensure_single_order_customer_columns($conn) {
     $columns = [
         'customer_name' => 'VARCHAR(255) NULL',
         'customer_email' => 'VARCHAR(255) NULL',
+        'status' => "VARCHAR(50) NOT NULL DEFAULT 'pending'",
     ];
 
     foreach ($columns as $column => $definition) {
@@ -115,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $quantity = intval($item['quantity']);
                     $order_amount = $item['subtotal'];
 
-                    $sql_order = "INSERT INTO single_order (user_id, product_id, total_amount, customer_name, customer_email) VALUES ('$user_id', '$product_id', '$order_amount', '$customer_name', '$customer_email')";
+                    $sql_order = "INSERT INTO single_order (user_id, product_id, total_amount, customer_name, customer_email, status) VALUES ('$user_id', '$product_id', '$order_amount', '$customer_name', '$customer_email', 'pending')";
                     if (!mysqli_query($conn, $sql_order)) {
                         $errors[] = "Failed to save order for '{$item['name']}': " . mysqli_error($conn);
                         break;
@@ -138,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errors)) {
                 unset($_SESSION['cart']);
-                header("Location: myorders.php");
+                header("Location: index.php");
                 exit();
             }
         }

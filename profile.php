@@ -15,7 +15,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
-    $password = $_POST['password']; // plain, stored as-is to match simple existing logic
+    $current_password = trim($_POST['current_password'] ?? '');
+    $new_password = trim($_POST['new_password'] ?? '');
+    $confirm_password = trim($_POST['confirm_password'] ?? '');
+
+    $storedRes = mysqli_query($conn, "SELECT password FROM users WHERE id='$user_id'");
+    $storedUser = $storedRes ? mysqli_fetch_assoc($storedRes) : null;
+    $stored_password = $storedUser['password'] ?? '';
 
     // If email is changed, ensure it's not used by another user
     $checkSql = "SELECT id FROM users WHERE email='$email' AND id != '$user_id'";
@@ -23,18 +29,30 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     if(mysqli_num_rows($checkRes) > 0){
         $msg = "Email already taken by another account.";
     } else {
-        if(trim($password) !== ''){
-            $password = mysqli_real_escape_string($conn, $password);
-            $update = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address', password='$password' WHERE id='$user_id'";
-        } else {
-            $update = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address' WHERE id='$user_id'";
+        $passwordSql = '';
+
+        if($new_password !== '' || $confirm_password !== '' || $current_password !== ''){
+            if($current_password === ''){
+                $msg = "Current password is required to change your password.";
+            } elseif($current_password !== $stored_password){
+                $msg = "Current password is incorrect.";
+            } elseif($new_password === ''){
+                $msg = "New password cannot be empty.";
+            } elseif($new_password !== $confirm_password){
+                $msg = "New password and confirm password do not match.";
+            } else {
+                $passwordSql = ", password='" . mysqli_real_escape_string($conn, $new_password) . "'";
+            }
         }
 
-        if(mysqli_query($conn, $update)){
-            $msg = "Profile updated successfully.";
-            $_SESSION['user_name'] = $name;
-        } else {
-            $msg = "Error updating profile: " . $conn->error;
+        if($msg === ''){
+            $update = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address'" . $passwordSql . " WHERE id='$user_id'";
+            if(mysqli_query($conn, $update)){
+                $msg = "Profile updated successfully.";
+                $_SESSION['user_name'] = $name;
+            } else {
+                $msg = "Error updating profile: " . $conn->error;
+            }
         }
     }
 }
@@ -79,8 +97,14 @@ $user = mysqli_fetch_assoc($res);
             <label>Address</label>
             <textarea class="input" name="address"><?php echo htmlspecialchars($user['address']); ?></textarea>
 
-            <label>New Password (leave blank to keep current)</label>
-            <input class="input" type="password" name="password">
+            <label>Current Password</label>
+            <input class="input" type="password" name="current_password">
+
+            <label>New Password</label>
+            <input class="input" type="password" name="new_password">
+
+            <label>Confirm New Password</label>
+            <input class="input" type="password" name="confirm_password">
 
             <button class="btn" type="submit">Save Changes</button>
         </form>

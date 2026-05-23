@@ -21,24 +21,45 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $phone = mysqli_real_escape_string($conn, trim($_POST['phone']));
     $address = mysqli_real_escape_string($conn, trim($_POST['address']));
     $role = mysqli_real_escape_string($conn, trim($_POST['role']));
-    $password = trim($_POST['password']);
+    $current_password = trim($_POST['current_password'] ?? '');
+    $new_password = trim($_POST['new_password'] ?? '');
+    $confirm_password = trim($_POST['confirm_password'] ?? '');
 
     $checkSql = "SELECT id FROM users WHERE email='$email' AND id != '$user_id'";
     $checkRes = mysqli_query($conn, $checkSql);
     if(mysqli_num_rows($checkRes) > 0){
         $msg = 'Email already in use.';
     } else {
-        if($password !== ''){
-            $password = mysqli_real_escape_string($conn, $password);
-            $sql = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address', role='$role', password='$password' WHERE id='$user_id'";
-        } else {
-            $sql = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address', role='$role' WHERE id='$user_id'";
+        $passwordSql = '';
+
+        if(!empty($current_password) || !empty($new_password) || !empty($confirm_password)){
+            if($current_password === ''){
+                $msg = 'Current password is required to change the password.';
+            } elseif($new_password === ''){
+                $msg = 'New password cannot be empty.';
+            } elseif($new_password !== $confirm_password){
+                $msg = 'New password and confirm password do not match.';
+            } else {
+                $storedRes = mysqli_query($conn, "SELECT password FROM users WHERE id='$user_id'");
+                $storedUser = mysqli_fetch_assoc($storedRes);
+                $stored_password = $storedUser['password'] ?? '';
+
+                if($current_password !== $stored_password){
+                    $msg = 'Current password is incorrect.';
+                } else {
+                    $new_password = mysqli_real_escape_string($conn, $new_password);
+                    $passwordSql = ", password='$new_password'";
+                }
+            }
         }
 
-        if(mysqli_query($conn, $sql)){
-            $msg = 'User updated successfully.';
-        } else {
-            $msg = 'DB Error: ' . mysqli_error($conn);
+        if($msg === ''){
+            $sql = "UPDATE users SET name='$name', email='$email', phone='$phone', address='$address', role='$role'$passwordSql WHERE id='$user_id'";
+            if(mysqli_query($conn, $sql)){
+                $msg = 'User updated successfully.';
+            } else {
+                $msg = 'DB Error: ' . mysqli_error($conn);
+            }
         }
     }
 }
@@ -116,8 +137,12 @@ body{ background:#f5f6fa; }
                         <option value="user" <?php echo ($user['role'] === 'user' ? 'selected' : ''); ?>>User</option>
                         <option value="admin" <?php echo ($user['role'] === 'admin' ? 'selected' : ''); ?>>Admin</option>
                     </select>
-                    <label>Password (leave blank to keep current)</label>
-                    <input class="input" type="password" name="password">
+                    <label>Current Password</label>
+                    <input class="input" type="password" name="current_password">
+                    <label>New Password</label>
+                    <input class="input" type="password" name="new_password">
+                    <label>Confirm New Password</label>
+                    <input class="input" type="password" name="confirm_password">
                     <button class="btn" type="submit">Save Changes</button>
                 </form>
             </div>

@@ -849,7 +849,7 @@ document.addEventListener("DOMContentLoaded", function(){
             <span class="buy-btn" style="background:#888;cursor:not-allowed;">Out of Stock</span>
           <?php } else { ?>
             <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
-              <a href="add_to_cart.php?product_id=<?php echo $f['id']; ?>" class="buy-btn">Add to Cart</a>
+              <a href="index.php?product_id=<?php echo $f['id']; ?>" class="buy-btn">Add to Cart</a>
               <a href="productdetails.php?product_id=<?php echo $f['id']; ?>" class="details-btn">Product Details</a>
             </div>
           <?php } ?>

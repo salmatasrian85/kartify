@@ -156,8 +156,12 @@ a.delete{
     font-size:13px;
 }
 
-a.update:hover{ background:#3e8e41; }
-a.delete:hover{ background:#c0392b; }
+a.update:hover{ 
+    background:#3e8e41; 
+}
+a.delete:hover{ 
+    background:#c0392b; 
+}
 
 </style>
 </head>

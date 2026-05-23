@@ -138,9 +138,6 @@ tbody tr:hover{
                 <h2>My Orders</h2>
                 <a href="index.php" class="back-link">Back to Shopping</a>
             </div>
-            <div class="user">
-                Welcome, <?php echo $_SESSION['user_name']; ?>
-            </div>
         </div>
 
         <!-- CONTENT -->
