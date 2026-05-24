@@ -69,12 +69,24 @@ $user = mysqli_fetch_assoc($res);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Profile</title>
 <style>
-*{ box-sizing:border-box; font-family:Inter, sans-serif; }
-.container{ max-width:840px; margin:40px auto; padding:20px; }
-.card{ background:#fff; padding:20px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
-.input{ width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px; }
-.btn{ padding:10px 16px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-.msg{ margin:10px 0; color:green; }
+*{ 
+    box-sizing:border-box; font-family:Inter, sans-serif; 
+    }
+    .container{
+        max-width:840px; margin:40px auto; padding:20px;
+        }
+    .card{
+        background:#fff; padding:20px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); 
+        }
+    .input{ 
+        width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px; 
+    }
+    .btn{ 
+        padding:10px 16px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; 
+    }
+    .msg{ 
+        margin:10px 0; color:green; 
+        }
 </style>
 </head>
 <body>

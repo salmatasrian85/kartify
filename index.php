@@ -686,6 +686,74 @@ $result_featured = mysqli_query($conn, $sql_featured);
     .profile-dropdown.active .dropdown-menu{
       display: flex;
     }
+    .why-shop{
+  padding: 80px 40px;
+  background: #f6f3ee;
+  text-align: center;
+    }
+
+    .why-shop h2{
+      font-size: 52px;
+      margin-bottom: 15px;
+    }
+
+    .why-sub{
+      max-width: 750px;
+      margin: 0 auto 50px;
+      color: #555;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .why-grid{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .why-card{
+      background: white;
+      padding: 30px 25px;
+      border-radius: 10px;
+      border: 1px solid #e7e0d6;
+      transition: 0.3s;
+    }
+
+    .why-card i{
+      font-size: 26px;
+      margin-bottom: 12px;
+      color: #111;
+    }
+
+    .why-card h3{
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .why-card p{
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .why-card:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    @media(max-width:768px){
+
+      .why-shop{
+        padding: 70px 20px;
+      }
+
+      .why-shop-container h2{
+        font-size: 40px;
+      }
+
+    }
 
     /* =========================
         RESPONSIVE
@@ -937,6 +1005,40 @@ document.addEventListener("DOMContentLoaded", function(){
 
   </section>
 
+  <section class="why-shop">
+  <h2 class="serif">Why Shop on Kartify?</h2>
+  <p class="why-sub">
+    Kartify is the best place to buy artwork online with confidence. Discover original paintings, fine art, sculpture, and more from the world's largest selection of original art.
+  </p>
+
+  <div class="why-grid">
+
+    <div class="why-card">
+      <i class="fa fa-globe"></i>
+      <h3>Global Artists</h3>
+      <p>Explore unique artworks created by emerging and established artists from different cultures and styles.</p>
+    </div>
+
+    <div class="why-card">
+      <i class="fa fa-shield-alt"></i>
+      <h3>Trusted Quality</h3>
+      <p>Every artwork is verified for originality and quality so you can collect with complete confidence.</p>
+    </div>
+
+    <div class="why-card">
+      <i class="fa fa-star"></i>
+      <h3>Curated Selection</h3>
+      <p>We handpick every piece to ensure only the most inspiring and meaningful artworks are showcased.</p>
+    </div>
+
+    <div class="why-card">
+      <i class="fa fa-truck"></i>
+      <h3>Safe Delivery</h3>
+      <p>Secure packaging and reliable shipping ensure your artwork arrives safely at your doorstep.</p>
+    </div>
+
+  </div>
+</section>
   <footer class="footer">
 
     <div class="footer-container">
