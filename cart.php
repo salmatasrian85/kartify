@@ -211,9 +211,8 @@ body { background:#f8f8f8; color:#1a1a1a; }
     <div class="header">
         <div>
             <h1>Shopping Cart</h1>
-            <p style="color:#555; margin-top:8px;">Review your selected art pieces and choose checkout.</p>
         </div>
-        <a href="index.php"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
+        <a href="index.php"><i class="fas fa-arrow-left"></i> Back to home</a>
     </div>
 
     <?php if (!empty($errors)): ?>
