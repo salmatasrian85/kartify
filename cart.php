@@ -20,9 +20,9 @@ function ensure_single_order_customer_columns($conn) {
 $cart = $_SESSION['cart'] ?? [];
 $cart_items = [];
 $total_amount = 0;
-$message = "";
 $errors = [];
 
+/* REMOVE ITEM */
 if (isset($_GET['remove'])) {
     $remove_id = intval($_GET['remove']);
     if (isset($cart[$remove_id])) {
@@ -33,111 +33,96 @@ if (isset($_GET['remove'])) {
     exit();
 }
 
+/* FORM HANDLING */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    /* UPDATE QTY */
     if (isset($_POST['update_qty'])) {
         foreach ($_POST['qty'] as $product_id => $qty) {
             $product_id = intval($product_id);
             $qty = max(1, intval($qty));
-            if ($qty > 0) {
-                $cart[$product_id] = $qty;
-            }
+            $cart[$product_id] = $qty;
         }
         $_SESSION['cart'] = $cart;
         header("Location: cart.php");
         exit();
     }
 
+    /* CHECKOUT */
     if (isset($_POST['checkout'])) {
+
         if (!isset($_SESSION['user_id'])) {
             header("Location: login.php");
             exit();
         }
 
         if (empty($cart)) {
-            $errors[] = "Your cart is empty. Add products before checkout.";
+            $errors[] = "Your cart is empty.";
         }
 
-        $payment_method = $_POST['payment_method'] ?? '';
-        if (!in_array($payment_method, ['cashon', 'mfs'])) {
-            $errors[] = "Please select a payment method.";
-        }
-
-        $mfs_number = '';
-        if ($payment_method === 'mfs') {
-            $mfs_number = trim($_POST['mfs_number'] ?? '');
-            if ($mfs_number === '') {
-                $errors[] = "Please enter your MFS account number.";
-            }
-        }
+        // ONLY CASH ON DELIVERY
+        $payment_method = 'cashon';
 
         if (empty($errors)) {
+
             $product_ids = array_map('intval', array_keys($cart));
             $id_list = implode(',', $product_ids);
-            $sql = "SELECT * FROM products WHERE id IN ($id_list)";
-            $result = mysqli_query($conn, $sql);
+            $result = mysqli_query($conn, "SELECT * FROM products WHERE id IN ($id_list)");
 
-            if ($result) {
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $product_id = intval($row['id']);
-                    if (!isset($cart[$product_id])) {
-                        continue;
-                    }
-                    $quantity = intval($cart[$product_id]);
-                    $row['quantity'] = $quantity;
-                    $row['subtotal'] = $row['price'] * $quantity;
-                    $cart_items[$product_id] = $row;
-                    $total_amount += $row['subtotal'];
-                }
+            while ($row = mysqli_fetch_assoc($result)) {
+                $pid = $row['id'];
+                $qty = $cart[$pid];
+                $row['quantity'] = $qty;
+                $row['subtotal'] = $row['price'] * $qty;
+                $cart_items[$pid] = $row;
+                $total_amount += $row['subtotal'];
             }
 
-            if (empty($cart_items)) {
-                $errors[] = "Cart items could not be loaded. Please try again.";
-            }
+            $user_id = $_SESSION['user_id'];
+            $user = mysqli_fetch_assoc(mysqli_query($conn, "SELECT name,email FROM users WHERE id='$user_id'"));
 
-            $user_id = intval($_SESSION['user_id']);
-            $user_result = mysqli_query($conn, "SELECT name, email FROM users WHERE id = '$user_id'");
-            $user_data = $user_result ? mysqli_fetch_assoc($user_result) : [];
-            $customer_name = mysqli_real_escape_string($conn, $user_data['name'] ?? '');
-            $customer_email = mysqli_real_escape_string($conn, $user_data['email'] ?? '');
+            $customer_name = mysqli_real_escape_string($conn, $user['name']);
+            $customer_email = mysqli_real_escape_string($conn, $user['email']);
+
             ensure_single_order_customer_columns($conn);
 
-            if (empty($errors)) {
-                foreach ($cart_items as $item) {
-                    if ($item['quantity'] > intval($item['stock'])) {
-                        $errors[] = "Product '{$item['name']}' does not have enough stock.";
-                        break;
-                    }
+            /* STOCK CHECK */
+            foreach ($cart_items as $item) {
+                if ($item['quantity'] > $item['stock']) {
+                    $errors[] = "Not enough stock for {$item['name']}";
+                    break;
                 }
             }
 
+            /* INSERT ORDER */
             if (empty($errors)) {
                 foreach ($cart_items as $item) {
-                    $product_id = intval($item['id']);
-                    $quantity = intval($item['quantity']);
-                    $order_amount = $item['subtotal'];
 
-                    $sql_order = "INSERT INTO single_order (user_id, product_id, total_amount, customer_name, customer_email, status) VALUES ('$user_id', '$product_id', '$order_amount', '$customer_name', '$customer_email', 'pending')";
-                    if (!mysqli_query($conn, $sql_order)) {
-                        $errors[] = "Failed to save order for '{$item['name']}': " . mysqli_error($conn);
-                        break;
-                    }
+                    $pid = $item['id'];
+                    $qty = $item['quantity'];
+                    $amount = $item['subtotal'];
+
+                    mysqli_query($conn, "
+                        INSERT INTO single_order 
+                        (user_id, product_id, total_amount, customer_name, customer_email, status)
+                        VALUES ('$user_id','$pid','$amount','$customer_name','$customer_email','pending')
+                    ");
 
                     $order_id = mysqli_insert_id($conn);
-                    $sql_payment = "INSERT INTO payments (order_id, user_id, total_amount, payment_method) VALUES ('$order_id', '$user_id', '$order_amount', '$payment_method')";
-                    if (!mysqli_query($conn, $sql_payment)) {
-                        $errors[] = "Failed to save payment for '{$item['name']}': " . mysqli_error($conn);
-                        break;
-                    }
 
-                    $sql_stock = "UPDATE products SET stock = stock - '$quantity' WHERE id = '$product_id'";
-                    if (!mysqli_query($conn, $sql_stock)) {
-                        $errors[] = "Failed to update stock for '{$item['name']}': " . mysqli_error($conn);
-                        break;
-                    }
+                    mysqli_query($conn, "
+                        INSERT INTO payments 
+                        (order_id,user_id,total_amount,payment_method)
+                        VALUES ('$order_id','$user_id','$amount','$payment_method')
+                    ");
+
+                    mysqli_query($conn, "
+                        UPDATE products 
+                        SET stock = stock - '$qty' 
+                        WHERE id='$pid'
+                    ");
                 }
-            }
 
-            if (empty($errors)) {
                 unset($_SESSION['cart']);
                 header("Location: index.php");
                 exit();
@@ -146,22 +131,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/* LOAD CART */
 if (!empty($cart)) {
-    $product_ids = array_map('intval', array_keys($cart));
-    $id_list = implode(',', $product_ids);
-    $sql = "SELECT * FROM products WHERE id IN ($id_list)";
-    $result = mysqli_query($conn, $sql);
+    $ids = implode(',', array_keys($cart));
+    $res = mysqli_query($conn, "SELECT * FROM products WHERE id IN ($ids)");
 
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $product_id = intval($row['id']);
-            $quantity = intval($cart[$product_id]);
-            $subtotal = $row['price'] * $quantity;
-            $row['quantity'] = $quantity;
-            $row['subtotal'] = $subtotal;
-            $cart_items[$product_id] = $row;
-            $total_amount += $subtotal;
-        }
+    while ($row = mysqli_fetch_assoc($res)) {
+        $qty = $cart[$row['id']];
+        $row['quantity'] = $qty;
+        $row['subtotal'] = $row['price'] * $qty;
+        $cart_items[$row['id']] = $row;
+        $total_amount += $row['subtotal'];
     }
 }
 ?>
@@ -282,21 +262,14 @@ body { background:#f8f8f8; color:#1a1a1a; }
 
                 <div class="checkout-card">
                     <h2>Checkout</h2>
-                    <div class="method-group">
-                        <label>
-                            <input type="radio" name="payment_method" value="cashon" <?php echo (!isset($_POST['payment_method']) || $_POST['payment_method'] === 'cashon') ? 'checked' : ''; ?> >
-                            Cash on Delivery
-                        </label>
-                        <label>
-                            <input type="radio" name="payment_method" value="mfs" <?php echo (isset($_POST['payment_method']) && $_POST['payment_method'] === 'mfs') ? 'checked' : ''; ?> >
-                            Mobile Financial Service (bKash / Nagad)
-                        </label>
-                    </div>
-                    <div>
-                        <label for="mfs_number" style="display:block; margin-bottom:10px; font-weight:600;">MFS Account Number</label>
-                        <input class="input-field" type="text" id="mfs_number" name="mfs_number" placeholder="Enter bKash or Nagad number" value="<?php echo isset($_POST['mfs_number']) ? htmlspecialchars($_POST['mfs_number']) : ''; ?>">
-                    </div>
-                    <button type="submit" name="checkout" class="btn" style="margin-top:18px;">Place Order</button>
+
+                    <p style="margin-bottom:15px; color:#555;">
+                        Payment Method: <strong>Cash on Delivery</strong>
+                    </p>
+
+                    <button type="submit" name="checkout" class="btn">
+                        Place Order
+                    </button>
                 </div>
             </div>
         </form>
