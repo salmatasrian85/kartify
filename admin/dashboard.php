@@ -176,28 +176,19 @@ if($result){ $row = mysqli_fetch_assoc($result); $stats['stock_products'] = intv
 
             <div class="cards">
 
-                <div class="card">
+                <a href="displayproduct.php" class="card" style="text-decoration:none; color:inherit;">
                     <h3>Total Products</h3>
                     <p><?php echo $stats['products']; ?> products are currently in your catalogue.</p>
-                </div>
-
-                <div class="card">
+                </a>
+                <a href="vieworder.php" class="card" style="text-decoration:none; color:inherit;">
                     <h3>Total Orders</h3>
                     <p><?php echo $stats['orders']; ?> orders have been placed so far.</p>
-                </div>
-
-                <div class="card">
+                </a>
+                <a href="manage_users.php" class="card" style="text-decoration:none; color:inherit;">
                     <h3>Total Users</h3>
                     <p><?php echo $stats['users']; ?> users are registered in the system.</p>
-                </div>
-
-                <div class="card">
-                    <h3>In-Stock Products</h3>
-                    <p><?php echo $stats['stock_products']; ?> products currently have stock available.</p>
-                </div>
-
+                </a>
             </div>
-
         </div>
 
     </div>

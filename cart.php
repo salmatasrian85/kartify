@@ -124,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 unset($_SESSION['cart']);
+                $_SESSION['success_message'] = 'Order placed successfully!';
                 header("Location: index.php");
                 exit();
             }
@@ -231,11 +232,11 @@ body { background:#f8f8f8; color:#1a1a1a; }
                                     </div>
                                 </div>
                             </td>
-                            <td>৳ <?php echo number_format($item['price'], 2); ?></td>
+                            <td>Tk. <?php echo number_format($item['price'], 2); ?></td>
                             <td>
                                 <input class="qty-input" type="number" name="qty[<?php echo intval($item['id']); ?>]" value="<?php echo intval($item['quantity']); ?>" min="1">
                             </td>
-                            <td>৳ <?php echo number_format($item['subtotal'], 2); ?></td>
+                            <td>Tk. <?php echo number_format($item['subtotal'], 2); ?></td>
                             <td><a class="action-link" href="cart.php?remove=<?php echo intval($item['id']); ?>">Remove</a></td>
                         </tr>
                     <?php endforeach; ?>

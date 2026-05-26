@@ -38,6 +38,12 @@ $result = mysqli_query($conn, $sql);
 /* FEATURED PRODUCTS */
 $sql_featured = "SELECT * FROM products ORDER BY id DESC LIMIT 4";
 $result_featured = mysqli_query($conn, $sql_featured);
+
+$success_message = '';
+if (isset($_SESSION['success_message'])) {
+    $success_message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -795,6 +801,10 @@ document.addEventListener("DOMContentLoaded", function(){
       profile.classList.remove("active");
     });
   }
+
+  <?php if (!empty($success_message)): ?>
+    alert(<?php echo json_encode($success_message); ?>);
+  <?php endif; ?>
 
 });
 </script>
