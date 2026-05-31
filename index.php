@@ -1081,10 +1081,6 @@ document.addEventListener("DOMContentLoaded", function(){
             Dhanmondi, Dhaka
           </p>
 
-          <a href="#" class="contact-link">
-            Contact us / Locations
-          </a>
-
         </div>
 
         <div>
