@@ -702,9 +702,9 @@ if (isset($_SESSION['success_message'])) {
       display: flex;
     }
     .why-shop{
-  padding: 80px 40px;
-  background: #f6f3ee;
-  text-align: center;
+    padding: 80px 40px;
+    background: #f6f3ee;
+    text-align: center;
     }
 
     .why-shop h2{
