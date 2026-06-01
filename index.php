@@ -104,6 +104,15 @@ if (isset($_SESSION['success_message'])) {
       font-size: 34px;
       font-weight: 700;
       letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img{
+      height: 34px;
+      width: auto;
+      object-fit: contain;
     }
 
     .nav-links{
@@ -361,9 +370,9 @@ if (isset($_SESSION['success_message'])) {
       text-transform: uppercase;
     }
     .cart-wrap{
-  position: relative;
-  display: inline-block;
-}
+    position: relative;
+    display: inline-block;
+  }
 
 .cart-badge{
   position: absolute;
@@ -813,7 +822,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
   <nav class="nav">
 
-  <h1 class="logo serif">KARTIFY</h1>
+  <h1 class="logo serif"><img src="image/logoKartify.png" alt="Kartify Logo" class="logo-img">KARTIFY</h1>
 
   <div class="nav-search">
     <form action="index.php" method="get">
@@ -841,7 +850,7 @@ document.addEventListener("DOMContentLoaded", function(){
             <a href="profile.php">View Profile</a>
 
             <?php if(($_SESSION['user_role'] ?? '') === 'user'): ?>
-              <a href="myorders.php">Orders</a>
+              <a href="myorders.php">My Order History</a>
             <?php endif; ?>
 
             <a href="logout.php" class="logout">Log Out</a>

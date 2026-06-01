@@ -54,13 +54,18 @@ if(isset($_SESSION['user_id'])){
 
 .back-link{
     display:inline-block;
-    margin-top:10px;
-    padding:10px 16px;
+    padding:10px 20px;
     background:#111;
     color:white;
     text-decoration:none;
-    border-radius:8px;
+    border-radius:6px;
     font-size:14px;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.back-link:hover{
+    background:#333;
 }
 
 /* MAIN */
@@ -82,6 +87,17 @@ if(isset($_SESSION['user_id'])){
 
 .header h2{
     font-size:20px;
+}
+
+.header-left{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.header-right{
+    display:flex;
+    align-items:center;
 }
 
 .user{
@@ -134,9 +150,11 @@ tbody tr:hover{
 
         <!-- HEADER -->
         <div class="header">
-            <div>
+            <div class="header-left">
                 <h2>My Orders</h2>
-                <a href="index.php" class="back-link">Back to Shopping</a>
+            </div>
+            <div class="header-right">
+                <a href="index.php" class="back-link">Back to Shop</a>
             </div>
         </div>
 

@@ -73,8 +73,32 @@ $user = mysqli_fetch_assoc($res);
     box-sizing:border-box; font-family:Inter, sans-serif; 
     }
     .container{
-        max-width:840px; margin:40px auto; padding:20px;
+        max-width:840px; margin:0 auto; padding:20px;
         }
+    .header{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:30px;
+    }
+    .header h2{
+        font-size:24px;
+        margin:0;
+    }
+    .back-link{
+        display:inline-block;
+        padding:10px 20px;
+        background:#111;
+        color:#fff;
+        text-decoration:none;
+        border-radius:6px;
+        font-size:14px;
+        font-weight:600;
+        transition:0.3s;
+    }
+    .back-link:hover{
+        background:#333;
+    }
     .card{
         background:#fff; padding:20px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); 
         }
@@ -82,7 +106,10 @@ $user = mysqli_fetch_assoc($res);
         width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px; 
     }
     .btn{ 
-        padding:10px 16px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; 
+        padding:10px 16px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s;
+    }
+    .btn:hover{
+        background:#333;
     }
     .msg{ 
         margin:10px 0; color:green; 
@@ -92,9 +119,11 @@ $user = mysqli_fetch_assoc($res);
 <body>
 
 <div class="container">
-    <a href="index.php">← Back to Shop</a>
-    <div class="card">
+    <div class="header">
         <h2>My Profile</h2>
+        <a href="index.php" class="back-link">Back to Shop</a>
+    </div>
+    <div class="card">
         <?php if($msg !== ""){ echo '<div class="msg">'.htmlspecialchars($msg).'</div>'; } ?>
         <form method="post">
             <label>Full Name</label>

@@ -193,7 +193,6 @@ body { background:#f8f8f8; color:#1a1a1a; }
         <div>
             <h1>Shopping Cart</h1>
         </div>
-        <a href="index.php"><i class="fas fa-arrow-left"></i> Back to home</a>
     </div>
 
     <?php if (!empty($errors)): ?>
