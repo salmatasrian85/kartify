@@ -6,6 +6,8 @@ function ensure_single_order_customer_columns($conn) {
     $columns = [
         'customer_name' => 'VARCHAR(255) NULL',
         'customer_email' => 'VARCHAR(255) NULL',
+        'customer_phone' => 'VARCHAR(50) NULL',
+        'shipping_address' => 'TEXT NULL',
         'status' => "VARCHAR(50) NOT NULL DEFAULT 'pending'",
     ];
 
@@ -21,6 +23,10 @@ $cart = $_SESSION['cart'] ?? [];
 $cart_items = [];
 $total_amount = 0;
 $errors = [];
+$customer_name = '';
+$customer_email = '';
+$customer_phone = '';
+$shipping_address = '';
 
 /* REMOVE ITEM */
 if (isset($_GET['remove'])) {
@@ -56,6 +62,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
+        $customer_name = trim($_POST['customer_name'] ?? '');
+        $customer_email = trim($_POST['customer_email'] ?? '');
+        $customer_phone = trim($_POST['customer_phone'] ?? '');
+        $shipping_address = trim($_POST['shipping_address'] ?? '');
+
+        if ($customer_name === '') {
+            $errors[] = "Please enter your name.";
+        }
+
+        if ($customer_email === '') {
+            $errors[] = "Please enter your email address.";
+        } elseif (!filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Please enter a valid email address.";
+        }
+
+        if ($customer_phone === '') {
+            $errors[] = "Please enter your phone number.";
+        }
+
+        if ($shipping_address === '') {
+            $errors[] = "Please enter your shipping address.";
+        }
+
         if (empty($cart)) {
             $errors[] = "Your cart is empty.";
         }
@@ -79,10 +108,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $user_id = $_SESSION['user_id'];
-            $user = mysqli_fetch_assoc(mysqli_query($conn, "SELECT name,email FROM users WHERE id='$user_id'"));
-
-            $customer_name = mysqli_real_escape_string($conn, $user['name']);
-            $customer_email = mysqli_real_escape_string($conn, $user['email']);
+            $escaped_name = mysqli_real_escape_string($conn, $customer_name);
+            $escaped_email = mysqli_real_escape_string($conn, $customer_email);
+            $escaped_phone = mysqli_real_escape_string($conn, $customer_phone);
+            $escaped_address = mysqli_real_escape_string($conn, $shipping_address);
 
             ensure_single_order_customer_columns($conn);
 
@@ -104,8 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     mysqli_query($conn, "
                         INSERT INTO single_order 
-                        (user_id, product_id, total_amount, customer_name, customer_email, status)
-                        VALUES ('$user_id','$pid','$amount','$customer_name','$customer_email','pending')
+                        (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
+                        VALUES ('$user_id','$pid','$amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
                     ");
 
                     $order_id = mysqli_insert_id($conn);
@@ -227,7 +256,7 @@ body { background:#f8f8f8; color:#1a1a1a; }
                                     <img src="image/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
                                     <div>
                                         <strong><?php echo htmlspecialchars($item['name']); ?></strong><br>
-                                        <span style="color:#777;"><?php echo htmlspecialchars($item['category_name']); ?></span>
+                                        <span class="product-category"><?php echo htmlspecialchars($item['category_name']); ?></span>
                                     </div>
                                 </div>
                             </td>
@@ -255,15 +284,27 @@ body { background:#f8f8f8; color:#1a1a1a; }
                         <span>Total</span>
                         <span>Tk. <?php echo number_format($total_amount, 2); ?></span>
                     </div>
-                    <div style="margin-top:12px;">
-                        <button type="submit" name="update_qty" class="btn" style="width:auto; padding:10px 14px; background:#666;">Update Cart</button>
+                    <div class="update-cart-wrap">
+                        <button type="submit" name="update_qty" class="btn btn-secondary" formnovalidate>Update Cart</button>
                     </div>
                 </div>
 
                 <div class="checkout-card">
                     <h2>Checkout</h2>
 
-                    <p style="margin-bottom:15px; color:#555;">
+                    <label class="checkout-label short">Name</label>
+                    <input type="text" name="customer_name" class="input-field" placeholder="Enter your full name" value="<?php echo htmlspecialchars($customer_name); ?>" required>
+
+                    <label class="checkout-label spaced">Phone</label>
+                    <input type="tel" name="customer_phone" class="input-field" placeholder="Enter your phone number" value="<?php echo htmlspecialchars($customer_phone); ?>" required>
+
+                    <label class="checkout-label spaced">Email</label>
+                    <input type="email" name="customer_email" class="input-field" placeholder="Enter your email address" value="<?php echo htmlspecialchars($customer_email); ?>" required>
+
+                    <label class="checkout-label spaced">Shipping Address</label>
+                    <textarea name="shipping_address" class="input-field" rows="4" placeholder="Enter your shipping address" required><?php echo htmlspecialchars($shipping_address); ?></textarea>
+
+                    <p class="checkout-note">
                         Payment Method: <strong>Cash on Delivery</strong>
                     </p>
 
