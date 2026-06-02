@@ -32,7 +32,7 @@ if ($current_qty + 1 > $current_stock) {
 $cart[$product_id] = $current_qty + 1;
 $_SESSION['cart'] = $cart;
 
-$redirect = 'cart.php';
+$redirect = 'index.php';
 if (isset($_GET['redirect'])) {
     $allowed = ['index.php', 'productdetails.php', 'cart.php'];
     $candidate = basename($_GET['redirect']);

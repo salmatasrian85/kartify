@@ -9,6 +9,9 @@ function ensure_single_order_customer_columns($conn) {
         'customer_phone' => 'VARCHAR(50) NULL',
         'shipping_address' => 'TEXT NULL',
         'status' => "VARCHAR(50) NOT NULL DEFAULT 'pending'",
+        'total_amount' => 'DECIMAL(10,2) NOT NULL DEFAULT 0',
+        'quantity' => 'INT NOT NULL DEFAULT 1',
+        'group_id' => 'INT NULL',
     ];
 
     foreach ($columns as $column => $definition) {
@@ -125,6 +128,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* INSERT ORDER */
             if (empty($errors)) {
+                // Create a master order row for the entire checkout
+                mysqli_query($conn, "
+                    INSERT INTO single_order 
+                    (user_id, product_id, quantity, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
+                    VALUES ('$user_id',0,0,'$total_amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
+                ");
+                $master_order_id = mysqli_insert_id($conn);
+
+                // Insert individual item rows linked to the master order via group_id
                 foreach ($cart_items as $item) {
 
                     $pid = $item['id'];
@@ -133,16 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     mysqli_query($conn, "
                         INSERT INTO single_order 
-                        (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
-                        VALUES ('$user_id','$pid','$amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
-                    ");
-
-                    $order_id = mysqli_insert_id($conn);
-
-                    mysqli_query($conn, "
-                        INSERT INTO payments 
-                        (order_id,user_id,total_amount,payment_method)
-                        VALUES ('$order_id','$user_id','$amount','$payment_method')
+                        (user_id, product_id, quantity, total_amount, customer_name, customer_email, customer_phone, shipping_address, status, group_id)
+                        VALUES ('$user_id','$pid','$qty','$amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending','$master_order_id')
                     ");
 
                     mysqli_query($conn, "
@@ -151,6 +155,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         WHERE id='$pid'
                     ");
                 }
+
+                // Single payment record for the whole order
+                mysqli_query($conn, "
+                    INSERT INTO payments 
+                    (order_id,user_id,total_amount,payment_method)
+                    VALUES ('$master_order_id','$user_id','$total_amount','$payment_method')
+                ");
 
                 unset($_SESSION['cart']);
                 $_SESSION['success_message'] = 'Order placed successfully!';
@@ -213,9 +224,10 @@ body { background:#f8f8f8; color:#1a1a1a; }
 .notice.success { background:#e9f9ee; color:#1b6c3f; }
 .empty-state { background:white; padding:40px; border-radius:16px; text-align:center; box-shadow:0 10px 28px rgba(0,0,0,0.05); }
 .empty-state a { margin-top:18px; display:inline-block; text-decoration:none; color:white; background:#111; padding:12px 24px; border-radius:10px; }
-@media(max-width:860px) { .summary { grid-template-columns:1fr; } .product-name { flex-direction:column; align-items:flex-start; } .cart-table th, .cart-table td { padding:14px 12px; } }
-
     
+    .back-to-shop{ display:inline-block; background:#111; color:#fff !important; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:600; }
+    .back-to-shop:hover{ opacity:.9 }
+    .btn{ color:#fff !important; }
 </style>
 </head>
 <body>
@@ -224,6 +236,7 @@ body { background:#f8f8f8; color:#1a1a1a; }
         <div>
             <h1>Shopping Cart</h1>
         </div>
+        
     </div>
 
     <?php if (!empty($errors)): ?>

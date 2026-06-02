@@ -5,11 +5,12 @@ $msg = "";
 $showLogin = false;
 
 if(isset($_POST['submit'])){
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $phone = $_POST['phone'];
-    $address = $_POST['address'];
+    // sanitize inputs to prevent SQL syntax errors (e.g., apostrophes in names)
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    $phone = mysqli_real_escape_string($conn, $_POST['phone']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
     $role = "user";
 
     $check = "SELECT * FROM users WHERE email='$email'";
@@ -19,8 +20,8 @@ if(isset($_POST['submit'])){
         $msg = "Email already exists!";
     } else {
 
-        $sql = "insert into users(name,email,password,phone,address,role)
-                values('$name','$email','$password','$phone','$address','$role')";
+        $sql = "INSERT INTO users (name,email,password,phone,address,role)
+            VALUES ('$name','$email','$password','$phone','$address','$role')";
 
         $result = mysqli_query($conn,$sql);
 

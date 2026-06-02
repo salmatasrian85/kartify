@@ -7,11 +7,28 @@ if(isset($_SESSION['user_id'])){
 
     if($_SESSION['user_role'] == "admin"){
 
-        // ================= FETCH ORDERS =================
-        $sql = "SELECT single_order.*, users.name, users.email
-                FROM single_order
-                JOIN users ON single_order.user_id = users.id
-                ORDER BY single_order.id DESC";
+        // ================= FETCH ORDERS (only master orders when grouping is enabled)
+        $has_group = false;
+        $col_check = mysqli_query($conn, "SHOW COLUMNS FROM single_order LIKE 'group_id'");
+        if($col_check && mysqli_num_rows($col_check) > 0){
+            $has_group = true;
+        }
+
+        if($has_group){
+            // include explicit master rows (product_id = 0) or master ids referenced by child rows
+            $sql = "SELECT so.*, users.name, users.email
+                FROM single_order so
+                JOIN users ON so.user_id = users.id
+                WHERE so.product_id = 0
+                   OR so.id IN (SELECT DISTINCT group_id FROM single_order WHERE group_id IS NOT NULL AND group_id != 0)
+                ORDER BY so.id DESC";
+        } else {
+            // fallback: older schema, show all orders
+            $sql = "SELECT single_order.*, users.name, users.email
+                    FROM single_order
+                    JOIN users ON single_order.user_id = users.id
+                    ORDER BY single_order.id DESC";
+        }
 
         $result = mysqli_query($conn, $sql);
 
@@ -189,6 +206,11 @@ td{
     background:#e74c3c;
 }
 
+.view{
+    background:#3498db;
+}
+
+
 .page-title{
     font-size:20px;
     margin-bottom:18px;
@@ -210,7 +232,7 @@ td{
         <a href="addproduct.php">Add Product</a>
         <a href="displayproduct.php">Manage Products</a>
         <a href="manage_users.php">Manage Users</a>
-        <a href="vieworder.php">Orders</a>
+        <a href="vieworder.php">Customer Orders</a>
         <a href="admin_profile.php">Profile</a>
         <a href="../logout.php">Logout</a>
 
@@ -256,8 +278,7 @@ td{
 
                         <tr>
                             <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Product ID</th>
+                            <th>Customer Email</th>
                             <th>Total Amount</th>
                             <th>Status</th>
                             <th>Date</th>
@@ -279,8 +300,6 @@ td{
                                 <small><?php echo htmlspecialchars($row['email']); ?></small>
                             </td>
 
-                            <td><?php echo $row['product_id']; ?></td>
-
                             <td>Tk <?php echo $row['total_amount']; ?></td>
 
                             <td>
@@ -292,6 +311,8 @@ td{
                             <td><?php echo $row['created_at']; ?></td>
 
                             <td class="action">
+
+                                <a class="view" href="order_details.php?id=<?php echo $row['id']; ?>">View</a>
 
                                 <a class="update" href="update_status.php?id=<?php echo $row['id']; ?>">
                                     Update

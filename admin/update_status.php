@@ -64,7 +64,7 @@ $order = mysqli_fetch_assoc($res);
         <a href="addproduct.php">Add Product</a>
         <a href="displayproduct.php">Manage Products</a>
         <a href="manage_users.php">Manage Users</a>
-        <a class="active" href="vieworder.php">Orders</a>
+        <a class="active" href="vieworder.php">Customer Orders</a>
         <a href="admin_profile.php">Profile</a>
         <a href="../logout.php">Logout</a>
     </div>

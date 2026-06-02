@@ -187,7 +187,7 @@ input, textarea, select{
         <a class="active" href="addproduct.php">Add Product</a>
         <a href="displayproduct.php">Manage Products</a>
         <a href="manage_users.php">Manage Users</a>
-        <a href="vieworder.php">Orders</a>
+        <a href="vieworder.php">Customer Orders</a>
         <a href="admin_profile.php">Profile</a>
         <a href="../logout.php">Logout</a>
     </div>

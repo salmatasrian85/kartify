@@ -7,11 +7,29 @@ if(isset($_SESSION['user_id'])){
 
         $user_id = $_SESSION['user_id'];
 
-        $sql = "SELECT single_order.*, payments.payment_method
-                FROM single_order
-                LEFT JOIN payments ON payments.order_id = single_order.id
-                WHERE single_order.user_id = '$user_id'
-                ORDER BY single_order.id DESC";
+        // Check if group_id column exists for grouping support
+        $has_group = false;
+        $col_check = mysqli_query($conn, "SHOW COLUMNS FROM single_order LIKE 'group_id'");
+        if($col_check && mysqli_num_rows($col_check) > 0){
+            $has_group = true;
+        }
+
+        if($has_group){
+            // Show only master orders (product_id = 0 or master ids referenced by group_id)
+            $sql = "SELECT so.*, p.payment_method
+                    FROM single_order so
+                    LEFT JOIN payments p ON p.order_id = so.id
+                    WHERE so.user_id = '$user_id'
+                      AND (so.product_id = 0 OR so.id IN (SELECT DISTINCT group_id FROM single_order WHERE group_id IS NOT NULL AND group_id != 0))
+                    ORDER BY so.id DESC";
+        } else {
+            // Fallback for older schema
+            $sql = "SELECT so.*, p.payment_method
+                    FROM single_order so
+                    LEFT JOIN payments p ON p.order_id = so.id
+                    WHERE so.user_id = '$user_id'
+                    ORDER BY so.id DESC";
+        }
         $result = mysqli_query($conn,$sql);
 
         if(!$result){
@@ -132,12 +150,23 @@ thead{
 
 th, td{
     padding:12px;
-    text-align:center;
+    text-align:left;
     border-bottom:1px solid #eee;
 }
 
 tbody tr:hover{
     background:#f9f9f9;
+}
+
+.action-link{
+    color:#3498db;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+}
+
+.action-link:hover{
+    text-decoration:underline;
 }
 
 
@@ -180,9 +209,9 @@ tbody tr:hover{
                     <tbody>
                         <?php while($row=mysqli_fetch_assoc($result)){ ?>
                         <tr>
-                            <td>#<?php echo $row['id'] ?></td>
-                            <td>Tk. <?php echo $row['total_amount']?></td>
-                            <td><?php echo htmlspecialchars($row['payment_method'] ?? ''); ?></td>
+                            <td>#<?php echo intval($row['id']); ?></td>
+                            <td>Tk. <?php echo number_format($row['total_amount'], 2); ?></td>
+                            <td><?php echo htmlspecialchars($row['payment_method'] ?? 'Cash on Delivery'); ?></td>
                             <td><?php echo htmlspecialchars(ucfirst($row['status'] ?? 'pending')); ?></td>
                         </tr>
                         <?php } ?> 
