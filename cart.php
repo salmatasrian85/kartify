@@ -10,7 +10,6 @@ function ensure_single_order_customer_columns($conn) {
         'shipping_address' => 'TEXT NULL',
         'status' => "VARCHAR(50) NOT NULL DEFAULT 'pending'",
         'total_amount' => 'DECIMAL(10,2) NOT NULL DEFAULT 0',
-        'quantity' => 'INT NOT NULL DEFAULT 1',
         'group_id' => 'INT NULL',
     ];
 
@@ -129,44 +128,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             /* INSERT ORDER */
             if (empty($errors)) {
                 // Create a master order row for the entire checkout
-                mysqli_query($conn, "
+                $master_insert = mysqli_query($conn, "
                     INSERT INTO single_order 
-                    (user_id, product_id, quantity, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
-                    VALUES ('$user_id',0,0,'$total_amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
+                    (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
+                    VALUES ('$user_id',0,'$total_amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
                 ");
-                $master_order_id = mysqli_insert_id($conn);
+                
+                if (!$master_insert) {
+                    $errors[] = "Error creating order: " . mysqli_error($conn);
+                } else {
+                    $master_order_id = mysqli_insert_id($conn);
 
-                // Insert individual item rows linked to the master order via group_id
-                foreach ($cart_items as $item) {
+                    // Insert individual item rows linked to the master order via group_id
+                    foreach ($cart_items as $item) {
 
-                    $pid = $item['id'];
-                    $qty = $item['quantity'];
-                    $amount = $item['subtotal'];
+                        $pid = $item['id'];
+                        $qty = $item['quantity'];
+                        $amount = $item['subtotal'];
 
-                    mysqli_query($conn, "
-                        INSERT INTO single_order 
-                        (user_id, product_id, quantity, total_amount, customer_name, customer_email, customer_phone, shipping_address, status, group_id)
-                        VALUES ('$user_id','$pid','$qty','$amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending','$master_order_id')
-                    ");
+                        $item_insert = mysqli_query($conn, "
+                            INSERT INTO single_order 
+                            (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status, group_id)
+                            VALUES ('$user_id','$pid','$amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending','$master_order_id')
+                        ");
+                        
+                        if (!$item_insert) {
+                            $errors[] = "Error adding item to order: " . mysqli_error($conn);
+                            break;
+                        }
 
-                    mysqli_query($conn, "
-                        UPDATE products 
-                        SET stock = stock - '$qty' 
-                        WHERE id='$pid'
-                    ");
+                        mysqli_query($conn, "
+                            UPDATE products 
+                            SET stock = stock - '$qty' 
+                            WHERE id='$pid'
+                        ");
+                    }
+
+                    // Single payment record for the whole order
+                    if (empty($errors)) {
+                        $payment_insert = mysqli_query($conn, "
+                            INSERT INTO payments 
+                            (order_id,user_id,total_amount,payment_method)
+                            VALUES ('$master_order_id','$user_id','$total_amount','$payment_method')
+                        ");
+                        
+                        if ($payment_insert) {
+                            unset($_SESSION['cart']);
+                            $_SESSION['success_message'] = 'Order placed successfully!';
+                            header("Location: index.php");
+                            exit();
+                        } else {
+                            $errors[] = "Error processing payment: " . mysqli_error($conn);
+                        }
+                    }
                 }
-
-                // Single payment record for the whole order
-                mysqli_query($conn, "
-                    INSERT INTO payments 
-                    (order_id,user_id,total_amount,payment_method)
-                    VALUES ('$master_order_id','$user_id','$total_amount','$payment_method')
-                ");
-
-                unset($_SESSION['cart']);
-                $_SESSION['success_message'] = 'Order placed successfully!';
-                header("Location: index.php");
-                exit();
             }
         }
     }
@@ -236,7 +251,11 @@ body { background:#f8f8f8; color:#1a1a1a; }
         <div>
             <h1>Shopping Cart</h1>
         </div>
-        
+        <?php if (!empty($cart_items)): ?>
+            <div>
+                <a class="back-to-shop" href="index.php">← Back to Shop</a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <?php if (!empty($errors)): ?>
@@ -298,9 +317,6 @@ body { background:#f8f8f8; color:#1a1a1a; }
                     <div class="summary-item total">
                         <span>Total</span>
                         <span>Tk. <?php echo number_format($total_amount, 2); ?></span>
-                    </div>
-                    <div class="update-cart-wrap">
-                        <button type="submit" name="update_qty" class="btn btn-secondary" formnovalidate>Update Cart</button>
                     </div>
                 </div>
 
