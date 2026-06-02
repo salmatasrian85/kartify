@@ -139,6 +139,8 @@ if($result){ $row = mysqli_fetch_assoc($result); $stats['stock_products'] = intv
     font-size:14px;
 }
 
+
+    
 </style>
 </head>
 
@@ -194,6 +196,7 @@ if($result){ $row = mysqli_fetch_assoc($result); $stats['stock_products'] = intv
     </div>
 
 </div>
+
 
 </body>
 </html>

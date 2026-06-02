@@ -146,6 +146,8 @@ if(isset($_POST['submit'])){
     text-decoration: none;
     border-bottom: 1px solid black;
 }
+
+    
 </style>
 </head>
 
@@ -205,6 +207,7 @@ if(isset($_POST['submit'])){
     </div>
 
 </div>
+
 
 </body>
 </html>

@@ -52,7 +52,9 @@ $order = mysqli_fetch_assoc($res);
     .actions{ margin-top:16px; display:flex; gap:12px; align-items:center; }
     .btn-primary{ background:#111; color:#fff; border:none; cursor:pointer; }
     .btn-link{ color:#111; text-decoration:none; padding:10px 14px; border:1px solid #ddd; border-radius:6px; display:inline-block; }
-  </style>
+  
+    
+</style>
 </head>
 <body>
 <div class="container">
@@ -91,5 +93,6 @@ $order = mysqli_fetch_assoc($res);
         </div>
     </div>
 </div>
+
 </body>
 </html>

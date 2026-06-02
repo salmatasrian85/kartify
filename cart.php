@@ -214,6 +214,8 @@ body { background:#f8f8f8; color:#1a1a1a; }
 .empty-state { background:white; padding:40px; border-radius:16px; text-align:center; box-shadow:0 10px 28px rgba(0,0,0,0.05); }
 .empty-state a { margin-top:18px; display:inline-block; text-decoration:none; color:white; background:#111; padding:12px 24px; border-radius:10px; }
 @media(max-width:860px) { .summary { grid-template-columns:1fr; } .product-name { flex-direction:column; align-items:flex-start; } .cart-table th, .cart-table td { padding:14px 12px; } }
+
+    
 </style>
 </head>
 <body>
@@ -316,5 +318,6 @@ body { background:#f8f8f8; color:#1a1a1a; }
         </form>
     <?php endif; ?>
 </div>
+
 </body>
 </html>

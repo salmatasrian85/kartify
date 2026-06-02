@@ -229,6 +229,8 @@ body{
 
 }
 
+
+    
 </style>
 
 </head>
@@ -273,7 +275,7 @@ body{
             </div>
 
             <div class="price">
-                ৳ <?php echo number_format($p['price'], 2); ?>
+                Tk. <?php echo number_format($p['price'], 2); ?>
             </div>
 
             <div class="description">
@@ -337,6 +339,7 @@ body{
     </div>
 
 </div>
+
 
 </body>
 </html>

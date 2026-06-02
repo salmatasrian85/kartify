@@ -96,7 +96,7 @@ if (isset($_GET['product_id'])) {
                     echo "<h3>Success!</h3>";
                     echo "Order Saved with ID: " . $order_id . "<br>";
                     echo "Payment Successful, Order Placed <br>";
-                    echo "Amount Paid: " . $price . " ৳<br>";
+                    echo "Amount Paid: " . $price . " Tk.<br>";
                     echo "Stock updated successfully.<br>";
                     echo "<a href='index.php'>Back to Shop</a>";
                 } else {

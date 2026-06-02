@@ -1105,3 +1105,16 @@ document.addEventListener("DOMContentLoaded", function(){
           </ul>
 
         </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Kartify. All rights reserved.</p>
+      </div>
+
+    </div>
+
+  </footer>
+
+</body>
+</html>

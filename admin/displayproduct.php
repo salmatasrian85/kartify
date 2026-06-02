@@ -163,6 +163,8 @@ a.delete:hover{
     background:#c0392b; 
 }
 
+
+    
 </style>
 </head>
 
@@ -244,6 +246,7 @@ a.delete:hover{
     </div>
 
 </div>
+
 
 </body>
 </html>

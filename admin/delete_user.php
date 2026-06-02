@@ -164,6 +164,8 @@ if(isset($_SESSION['user_id'])){
     font-weight:500;
 }
 
+
+    
 </style>
 </head>
 
@@ -257,6 +259,7 @@ if(isset($_SESSION['user_id'])){
     </div>
 
 </div>
+
 
 </body>
 </html>

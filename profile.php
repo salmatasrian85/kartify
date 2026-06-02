@@ -114,6 +114,8 @@ $user = mysqli_fetch_assoc($res);
     .msg{ 
         margin:10px 0; color:green; 
         }
+
+    
 </style>
 </head>
 <body>
@@ -151,6 +153,7 @@ $user = mysqli_fetch_assoc($res);
         </form>
     </div>
 </div>
+
 
 </body>
 </html>

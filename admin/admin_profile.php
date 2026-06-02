@@ -216,6 +216,8 @@ input, textarea{
     font-weight:500;
 }
 
+
+    
 </style>
 </head>
 
@@ -312,6 +314,7 @@ input, textarea{
     </div>
 
 </div>
+
 
 </body>
 </html>

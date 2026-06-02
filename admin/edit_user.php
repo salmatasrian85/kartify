@@ -99,6 +99,8 @@ body{ background:#f5f6fa; }
 .back-link{ display:inline-block; margin-bottom:18px; color:#111; text-decoration:none; }
 .success{ margin-bottom:12px; color:#155724; background:#d4edda; padding:10px 12px; border-radius:6px; }
 .error{ margin-bottom:12px; color:#721c24; background:#f8d7da; padding:10px 12px; border-radius:6px; }
+
+    
 </style>
 </head>
 <body>
@@ -149,5 +151,6 @@ body{ background:#f5f6fa; }
         </div>
     </div>
 </div>
+
 </body>
 </html>
