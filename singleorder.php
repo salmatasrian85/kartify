@@ -68,7 +68,7 @@ if (isset($_GET['product_id'])) {
         die("Sorry, this product is out of stock!");
     }
 
-    // Fake payment check. In real life, you will connect a bkash/nagad gateway here.
+    // Fake payment check
     $payment_status = "success"; 
 
     if ($payment_status == "success") {
@@ -92,7 +92,7 @@ if (isset($_GET['product_id'])) {
                 $sql_update_stock = "UPDATE products SET stock = stock - 1 WHERE id = '$product_id'";
                 
                 if (mysqli_query($conn, $sql_update_stock)) {
-                    // Show a nice message to the customer if everything works perfectly
+                    // Show a message to the customer if everything works perfectly
                     echo "<h3>Success!</h3>";
                     echo "Order Saved with ID: " . $order_id . "<br>";
                     echo "Payment Successful, Order Placed <br>";
