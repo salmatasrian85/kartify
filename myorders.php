@@ -194,7 +194,7 @@ tbody tr:hover{
 
             <div class="card">
 
-                <h3>Your Orders</h3>
+                <h3>My Orders</h3>
 
                 <table>
                     <thead>
