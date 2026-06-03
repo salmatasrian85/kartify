@@ -1094,14 +1094,13 @@ document.addEventListener("DOMContentLoaded", function(){
 
         <div>
 
-          <h3 class="serif">DISCOVER</h3>
+          <h3 class="serif">What We Offer</h3>
 
           <ul>
-            <li><a href="#">Arts </a></li>
-            <li><a href="#">Exhibitions</a></li>
-            <li><a href="#">Paintings</a></li>
-            <li><a href="#">Sculptures</a></li>
-            <li><a href="#">Photography</a></li>
+            <li>Arts </a></li>
+            <li>Paintings</a></li>
+            <li>Sculptures</a></li>
+            <li>Photography</a></li>
           </ul>
 
         </div>

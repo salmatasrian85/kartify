@@ -321,7 +321,7 @@ body { background:#f8f8f8; color:#1a1a1a; }
                 </div>
 
                 <div class="checkout-card">
-                    <h2>Checkout</h2>
+                    <h2>Billing Information</h2>
 
                     <label class="checkout-label short">Name</label>
                     <input type="text" name="customer_name" class="input-field" placeholder="Enter your full name" value="<?php echo htmlspecialchars($customer_name); ?>" required>
