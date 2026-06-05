@@ -212,6 +212,7 @@ a.delete:hover{
                         </tr>
                     </thead>
 
+                    
                     <tbody>
                         <?php while($row=mysqli_fetch_assoc($result)){ ?>
                         <tr>

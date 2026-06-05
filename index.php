@@ -1085,6 +1085,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
           <p>E: info@kartify.com</p>
 
+      
           <p>
             House 12, Road 7 <br>
             Dhanmondi, Dhaka
