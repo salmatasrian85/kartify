@@ -135,6 +135,7 @@ if (isset($_SESSION['success_message'])) {
       display: flex;
       align-items: center;
       gap: 18px;
+      flex-wrap: nowrap;
     }
 
     .nav-search{
@@ -184,10 +185,14 @@ if (isset($_SESSION['success_message'])) {
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: nowrap;
     }
 
     .cart-wrap{
       order: 2;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
     }
 
     .auth-btn{
@@ -198,6 +203,7 @@ if (isset($_SESSION['success_message'])) {
       text-decoration: none;
       transition: 0.3s;
       border: 1px solid #111;
+      white-space: nowrap;
     }
 
     .login-btn{
@@ -228,9 +234,12 @@ if (isset($_SESSION['success_message'])) {
       background: #111;
       color: white;
       font-size: 16px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .cart-wrap{ position: relative; display: inline-block; }
     .cart-badge{
       position: absolute;
       top: -8px;
@@ -243,6 +252,20 @@ if (isset($_SESSION['success_message'])) {
       line-height: 1;
       min-width: 22px;
       text-align: center;
+      z-index: 10;
+    }
+
+    .cart:hover{
+      transform: scale(1.1);
+    }
+
+    .cart-badge{
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop{
+      0%{ transform: scale(0); }
+      100%{ transform: scale(1); }
     }
 
     /* Profile icon */
@@ -259,6 +282,7 @@ if (isset($_SESSION['success_message'])) {
       font-weight:600;
       text-decoration:none;
       margin-left:8px;
+      flex-shrink: 0;
     }
 
     /* =========================
@@ -267,18 +291,18 @@ if (isset($_SESSION['success_message'])) {
 
     .hero{
       height: 85vh;
-      background:
-      linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
-      url("https://images.unsplash.com/photo-1513364776144-60967b0f800f")
-      center/cover;
+      background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url("https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1200&h=800&fit=crop") center/cover no-repeat fixed;
       display: flex;
       align-items: center;
       color: white;
+      width: 100%;
+      min-height: 85vh;
     }
 
     .hero-content{
       padding: 0 60px;
       max-width: 700px;
+      width: 100%;
     }
 
     .badge{
@@ -296,6 +320,7 @@ if (isset($_SESSION['success_message'])) {
       font-size: 76px;
       line-height: 1;
       margin-bottom: 25px;
+      word-break: break-word;
     }
 
     .hero p{
@@ -332,7 +357,7 @@ if (isset($_SESSION['success_message'])) {
 
     .featured-grid{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       justify-content: center;
       gap: 30px;
     }
@@ -348,6 +373,7 @@ if (isset($_SESSION['success_message'])) {
       align-items: center;
       padding: 25px 40px;
       border-bottom: 1px solid #ece7df;
+      width: 100%;
     }
 
     .filters .filter-label{
@@ -355,6 +381,7 @@ if (isset($_SESSION['success_message'])) {
       font-weight: 500;
       margin-right: 16px;
       color: #222;
+      flex: 0 0 100%;
     }
 
     .filters button{
@@ -368,38 +395,9 @@ if (isset($_SESSION['success_message'])) {
       font-weight: 500;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
-    .cart-wrap{
-    position: relative;
-    display: inline-block;
-  }
-
-.cart-badge{
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: #e74c3c;
-  color: white;
-  font-size: 12px;
-  padding: 4px 7px;
-  border-radius: 20px;
-  min-width: 22px;
-  text-align: center;
-}
-
-
-.cart:hover{
-  transform: scale(1.1);
-}
-
-.cart-badge{
-  animation: pop 0.3s ease;
-}
-
-@keyframes pop{
-  0%{ transform: scale(0); }
-  100%{ transform: scale(1); }
-}
 
     .filters button:hover{
       background: #111;
@@ -416,26 +414,31 @@ if (isset($_SESSION['success_message'])) {
     ========================= */
 
     .grid{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 300px));
+      display: flex;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 35px;
       padding: 50px 40px;
+      width: 100%;
     }
 
     .card{
       width: 100%;
-      max-width: 300px; /* 🔥 limit size */
-      margin: auto;
+      max-width: 300px;
+      margin: 0;
     }
 
     .card:hover{
       transform: translateY(-8px);
+      transition: 0.3s;
     }
 
     .card img{
       height: 360px;
+      width: 100%;
       object-fit: cover;
+      max-width: 100%;
+      display: block;
     }
 
     .card-content{
@@ -702,9 +705,9 @@ if (isset($_SESSION['success_message'])) {
       display: flex;
     }
     .why-shop{
-    padding: 80px 40px;
-    background: #f6f3ee;
-    text-align: center;
+      padding: 80px 40px;
+      background: #f6f3ee;
+      text-align: center;
     }
 
     .why-shop h2{
@@ -758,21 +761,171 @@ if (isset($_SESSION['success_message'])) {
       box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
 
-    @media(max-width:768px){
-
-      .why-shop{
-        padding: 70px 20px;
-      }
-
-      .why-shop-container h2{
-        font-size: 40px;
-      }
-
-    }
-
     /* =========================
         RESPONSIVE
     ========================= */
+
+    @media(max-width:768px){
+
+      .nav{
+        padding: 15px 20px;
+        flex-wrap: wrap;
+      }
+
+      .logo{
+        font-size: 24px;
+        gap: 8px;
+      }
+
+      .logo-img{
+        height: 24px;
+      }
+
+      .nav-search{
+        padding: 10px;
+        width: 100%;
+      }
+
+      .nav-search form{
+        width: 100%;
+      }
+
+      .nav-search input{
+        font-size: 12px;
+        padding: 8px 14px;
+      }
+
+      .nav-right{
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .nav-right input{
+        width: 100%;
+        max-width: 150px;
+      }
+
+      .cart-wrap{
+        margin-left: 0 !important;
+        order: -1;
+      }
+
+      .hero{
+        background-attachment: scroll;
+        height: 60vh;
+        min-height: auto;
+      }
+
+      .hero-content{
+        padding: 0 20px;
+        max-width: 100%;
+      }
+
+      .hero h2{
+        font-size: 32px;
+      }
+
+      .hero p{
+        font-size: 14px;
+      }
+
+      .featured{
+        padding: 40px 20px;
+      }
+
+      .featured h2{
+        font-size: 36px;
+      }
+
+      .featured-grid{
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+      }
+
+      .filters{
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .filters .filter-label{
+        flex: 0 0 100%;
+        font-size: 18px;
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+
+      .filters button{
+        font-size: 12px;
+        padding: 8px 14px;
+      }
+
+      .grid{
+        padding: 30px 20px;
+        gap: 20px;
+      }
+
+      .card{
+        max-width: 100%;
+      }
+
+      .card img{
+        height: 250px;
+      }
+
+      .card h3{
+        font-size: 22px;
+      }
+
+      .card-content{
+        padding: 16px;
+      }
+
+      .why-shop{
+        padding: 50px 20px;
+      }
+
+      .why-shop h2{
+        font-size: 36px;
+      }
+
+      .why-grid{
+        grid-template-columns: 1fr;
+      }
+
+      .footer{
+        padding: 50px 20px 30px;
+      }
+
+      .footer-top{
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+
+      .newsletter{
+        padding: 50px 20px;
+      }
+
+      .newsletter-left h2{
+        font-size: 40px;
+      }
+
+      .newsletter-form input{
+        width: 100%;
+      }
+
+      .newsletter-form button{
+        width: 100%;
+      }
+
+      .newsletter-right{
+        align-items: flex-start;
+        width: 100%;
+      }
+
+    }
 
     @media(max-width:992px){
 
@@ -787,8 +940,6 @@ if (isset($_SESSION['success_message'])) {
       .hero h2{
         font-size: 56px;
       }
-
-  
 
     }
 
@@ -900,7 +1051,7 @@ document.addEventListener("DOMContentLoaded", function(){
       </h2>
 
       <p>
-        Welcome to our art shop—a space where creativity comes to life. From vibrant paintings to handcrafted pieces, every item here tells a story. Whether you're an art lover, a collector, or simply exploring, we invite you to discover inspiration in every corner.
+        Welcome to our art shop—a space where creativity comes to life. From vibrant paintings to handcrafted pieces, every item here tells a story. Whether you're an art lover, a collector, or[...]
       </p>
 
     </div>
@@ -1020,10 +1171,6 @@ document.addEventListener("DOMContentLoaded", function(){
 
   </main>
 
-    </div>
-
-  </section>
-
   <section class="why-shop">
   <h2 class="serif">Why Shop on Kartify?</h2>
   <p class="why-sub">
@@ -1085,7 +1232,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
           <p>E: info@kartify.com</p>
 
-      
+       
           <p>
             House 12, Road 7 <br>
             Dhanmondi, Dhaka
