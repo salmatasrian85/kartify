@@ -243,6 +243,8 @@ body { background:#f8f8f8; color:#1a1a1a; }
 .input-field { width:100%; padding:12px 14px; border-radius:10px; border:1px solid #ddd; outline:none; }
 .btn { width:100%; padding:14px 18px; border:none; border-radius:12px; background:#111; color:white; font-size:16px; cursor:pointer; transition:0.3s; }
 .btn:hover { background:#333; }
+.btn-secondary { background:#666; width:auto; padding:10px 16px; font-size:14px; margin-top:16px; }
+.btn-secondary:hover { background:#888; }
 .notice { margin-bottom:20px; padding:14px 16px; border-radius:12px; }
 .notice.error { background:#fdecea; color:#b21b2d; }
 .notice.success { background:#e9f9ee; color:#1b6c3f; }
@@ -327,6 +329,9 @@ body { background:#f8f8f8; color:#1a1a1a; }
                         <span>Total</span>
                         <span>Tk. <?php echo number_format($total_amount, 2); ?></span>
                     </div>
+                    <button type="submit" name="update_qty" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i> Update Quantity
+                    </button>
                 </div>
 
                 <div class="checkout-card">
