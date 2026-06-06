@@ -127,34 +127,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* INSERT ORDER */
             if (empty($errors)) {
-                $master_order_id = null;
-                $first_insert = true;
+                // Create a master order row for the entire checkout
+                $master_insert = mysqli_query($conn, "
+                    INSERT INTO single_order 
+                    (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
+                    VALUES ('$user_id',0,'$total_amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
+                ");
+                
+                if (!$master_insert) {
+                    $errors[] = "Error creating order: " . mysqli_error($conn);
+                } else {
+                    $master_order_id = mysqli_insert_id($conn);
 
-                // Insert individual item rows linked to the master order via group_id
-                foreach ($cart_items as $item) {
+                    // Insert individual item rows linked to the master order via group_id
+                    foreach ($cart_items as $item) {
 
-                    $pid = $item['id'];
-                    $qty = $item['quantity'];
-                    $amount = $item['subtotal'];
+                        $pid = $item['id'];
+                        $qty = $item['quantity'];
+                        $amount = $item['subtotal'];
 
-                    // For the first item, don't set group_id (it will be the master)
-                    // For subsequent items, set group_id to the first item's ID
-                    if ($first_insert) {
-                        $item_insert = mysqli_query($conn, "
-                            INSERT INTO single_order 
-                            (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
-                            VALUES ('$user_id','$pid','$amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
-                        ");
-                        
-                        if ($item_insert) {
-                            $master_order_id = mysqli_insert_id($conn);
-                            $first_insert = false;
-                        } else {
-                            $errors[] = "Error adding first item to order: " . mysqli_error($conn);
-                            break;
-                        }
-                    } else {
-                        // Subsequent items - link to master via group_id
                         $item_insert = mysqli_query($conn, "
                             INSERT INTO single_order 
                             (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status, group_id)
@@ -165,30 +156,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $errors[] = "Error adding item to order: " . mysqli_error($conn);
                             break;
                         }
+
+                        mysqli_query($conn, "
+                            UPDATE products 
+                            SET stock = stock - '$qty' 
+                            WHERE id='$pid'
+                        ");
                     }
 
-                    mysqli_query($conn, "
-                        UPDATE products 
-                        SET stock = stock - '$qty' 
-                        WHERE id='$pid'
-                    ");
-                }
-
-                // Single payment record for the whole order
-                if (empty($errors) && $master_order_id) {
-                    $payment_insert = mysqli_query($conn, "
-                        INSERT INTO payments 
-                        (order_id,user_id,total_amount,payment_method)
-                        VALUES ('$master_order_id','$user_id','$total_amount','$payment_method')
-                    ");
-                    
-                    if ($payment_insert) {
-                        unset($_SESSION['cart']);
-                        $_SESSION['success_message'] = 'Order placed successfully!';
-                        header("Location: index.php");
-                        exit();
-                    } else {
-                        $errors[] = "Error processing payment: " . mysqli_error($conn);
+                    // Single payment record for the whole order
+                    if (empty($errors)) {
+                        $payment_insert = mysqli_query($conn, "
+                            INSERT INTO payments 
+                            (order_id,user_id,total_amount,payment_method)
+                            VALUES ('$master_order_id','$user_id','$total_amount','$payment_method')
+                        ");
+                        
+                        if ($payment_insert) {
+                            unset($_SESSION['cart']);
+                            $_SESSION['success_message'] = 'Order placed successfully!';
+                            header("Location: index.php");
+                            exit();
+                        } else {
+                            $errors[] = "Error processing payment: " . mysqli_error($conn);
+                        }
                     }
                 }
             }
@@ -243,8 +234,6 @@ body { background:#f8f8f8; color:#1a1a1a; }
 .input-field { width:100%; padding:12px 14px; border-radius:10px; border:1px solid #ddd; outline:none; }
 .btn { width:100%; padding:14px 18px; border:none; border-radius:12px; background:#111; color:white; font-size:16px; cursor:pointer; transition:0.3s; }
 .btn:hover { background:#333; }
-.btn-secondary { background:#666; width:auto; padding:10px 16px; font-size:14px; margin-top:16px; }
-.btn-secondary:hover { background:#888; }
 .notice { margin-bottom:20px; padding:14px 16px; border-radius:12px; }
 .notice.error { background:#fdecea; color:#b21b2d; }
 .notice.success { background:#e9f9ee; color:#1b6c3f; }
@@ -329,9 +318,6 @@ body { background:#f8f8f8; color:#1a1a1a; }
                         <span>Total</span>
                         <span>Tk. <?php echo number_format($total_amount, 2); ?></span>
                     </div>
-                    <button type="submit" name="update_qty" class="btn btn-secondary">
-                        <i class="fas fa-sync-alt"></i> Update Quantity
-                    </button>
                 </div>
 
                 <div class="checkout-card">
