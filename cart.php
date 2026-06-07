@@ -10,7 +10,7 @@ function ensure_single_order_customer_columns($conn) {
         'shipping_address' => 'TEXT NULL',
         'status' => "VARCHAR(50) NOT NULL DEFAULT 'pending'",
         'total_amount' => 'DECIMAL(10,2) NOT NULL DEFAULT 0',
-        'group_id' => 'INT NULL',
+        'quantity' => 'INT NOT NULL DEFAULT 1',
     ];
 
     foreach ($columns as $column => $definition) {
@@ -44,18 +44,6 @@ if (isset($_GET['remove'])) {
 /* FORM HANDLING */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    /* UPDATE QTY */
-    if (isset($_POST['update_qty'])) {
-        foreach ($_POST['qty'] as $product_id => $qty) {
-            $product_id = intval($product_id);
-            $qty = max(1, intval($qty));
-            $cart[$product_id] = $qty;
-        }
-        $_SESSION['cart'] = $cart;
-        header("Location: cart.php");
-        exit();
-    }
-
     /* CHECKOUT */
     if (isset($_POST['checkout'])) {
 
@@ -69,37 +57,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $customer_phone = trim($_POST['customer_phone'] ?? '');
         $shipping_address = trim($_POST['shipping_address'] ?? '');
 
-        if ($customer_name === '') {
-            $errors[] = "Please enter your name.";
+        // Capture submitted live quantities directly from checkout form submission
+        if (isset($_POST['qty']) && is_array($_POST['qty'])) {
+            foreach ($_POST['qty'] as $product_id => $qty) {
+                $product_id = intval($product_id);
+                $qty = max(1, intval($qty));
+                $cart[$product_id] = $qty;
+            }
+            $_SESSION['cart'] = $cart;
         }
 
-        if ($customer_email === '') {
-            $errors[] = "Please enter your email address.";
+        if ($customer_name === '') { $errors[] = "Please enter your name."; }
+        if ($customer_email === '') { 
+            $errors[] = "Please enter your email address."; 
         } elseif (!filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = "Please enter a valid email address.";
         }
+        if ($customer_phone === '') { $errors[] = "Please enter your phone number."; }
+        if ($shipping_address === '') { $errors[] = "Please enter your shipping address."; }
+        if (empty($cart)) { $errors[] = "Your cart is empty."; }
 
-        if ($customer_phone === '') {
-            $errors[] = "Please enter your phone number.";
-        }
-
-        if ($shipping_address === '') {
-            $errors[] = "Please enter your shipping address.";
-        }
-
-        if (empty($cart)) {
-            $errors[] = "Your cart is empty.";
-        }
-
-        // ONLY CASH ON DELIVERY
         $payment_method = 'cashon';
 
         if (empty($errors)) {
-
             $product_ids = array_map('intval', array_keys($cart));
             $id_list = implode(',', $product_ids);
             $result = mysqli_query($conn, "SELECT * FROM products WHERE id IN ($id_list)");
 
+            $total_amount = 0; // Reset to recalculate from refreshed db data
             while ($row = mysqli_fetch_assoc($result)) {
                 $pid = $row['id'];
                 $qty = $cart[$pid];
@@ -127,59 +112,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* INSERT ORDER */
             if (empty($errors)) {
-                // Create a master order row for the entire checkout
-                $master_insert = mysqli_query($conn, "
-                    INSERT INTO single_order 
-                    (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
-                    VALUES ('$user_id',0,'$total_amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending')
-                ");
-                
-                if (!$master_insert) {
-                    $errors[] = "Error creating order: " . mysqli_error($conn);
-                } else {
-                    $master_order_id = mysqli_insert_id($conn);
+                $item_error = false;
+                $main_order_id = null;
 
-                    // Insert individual item rows linked to the master order via group_id
-                    foreach ($cart_items as $item) {
+                foreach ($cart_items as $item) {
+                    $pid = $item['id'];
+                    $qty = $item['quantity'];
+                    $amount = $item['subtotal'];
 
-                        $pid = $item['id'];
-                        $qty = $item['quantity'];
-                        $amount = $item['subtotal'];
-
-                        $item_insert = mysqli_query($conn, "
-                            INSERT INTO single_order 
-                            (user_id, product_id, total_amount, customer_name, customer_email, customer_phone, shipping_address, status, group_id)
-                            VALUES ('$user_id','$pid','$amount','$escaped_name','$escaped_email','$escaped_phone','$escaped_address','pending','$master_order_id')
-                        ");
-                        
-                        if (!$item_insert) {
-                            $errors[] = "Error adding item to order: " . mysqli_error($conn);
-                            break;
-                        }
-
-                        mysqli_query($conn, "
-                            UPDATE products 
-                            SET stock = stock - '$qty' 
-                            WHERE id='$pid'
-                        ");
+                    $item_insert = mysqli_query($conn, "
+                        INSERT INTO single_order 
+                        (user_id, product_id, quantity, total_amount, customer_name, customer_email, customer_phone, shipping_address, status)
+                        VALUES ('$user_id', '$pid', '$qty', '$amount', '$escaped_name', '$escaped_email', '$escaped_phone', '$escaped_address', 'pending')
+                    ");
+                    
+                    if (!$item_insert) {
+                        $errors[] = "Error adding item to order: " . mysqli_error($conn);
+                        $item_error = true;
+                        break;
                     }
 
-                    // Single payment record for the whole order
-                    if (empty($errors)) {
-                        $payment_insert = mysqli_query($conn, "
-                            INSERT INTO payments 
-                            (order_id,user_id,total_amount,payment_method)
-                            VALUES ('$master_order_id','$user_id','$total_amount','$payment_method')
-                        ");
-                        
-                        if ($payment_insert) {
-                            unset($_SESSION['cart']);
-                            $_SESSION['success_message'] = 'Order placed successfully!';
-                            header("Location: index.php");
-                            exit();
-                        } else {
-                            $errors[] = "Error processing payment: " . mysqli_error($conn);
-                        }
+                    if ($main_order_id === null) {
+                        $main_order_id = mysqli_insert_id($conn);
+                    }
+
+                    mysqli_query($conn, "UPDATE products SET stock = stock - '$qty' WHERE id = '$pid'");
+                }
+
+                if (!$item_error && $main_order_id !== null) {
+                    $payment_insert = mysqli_query($conn, "
+                        INSERT INTO payments 
+                        (order_id, user_id, total_amount, payment_method)
+                        VALUES ('$main_order_id', '$user_id', '$total_amount', '$payment_method')
+                    ");
+                    
+                    if ($payment_insert) {
+                        unset($_SESSION['cart']);
+                        $_SESSION['success_message'] = 'Order placed successfully!';
+                        header("Location: index.php");
+                        exit();
+                    } else {
+                        $errors[] = "Error processing payment: " . mysqli_error($conn);
                     }
                 }
             }
@@ -226,23 +199,19 @@ body { background:#f8f8f8; color:#1a1a1a; }
 .summary { margin-top:24px; display:grid; gap:20px; grid-template-columns:1fr 320px; }
 .summary-card, .checkout-card { background:white; padding:24px; border-radius:16px; box-shadow:0 10px 28px rgba(0,0,0,0.05); }
 .summary-item { display:flex; justify-content:space-between; margin-bottom:14px; font-size:15px; }
-.summary-item.total { font-weight:700; font-size:18px; }
+.summary-item.total { font-weight:700; font-size:18px; border-top:1px solid #eee; padding-top:14px; margin-top:14px; }
 .checkout-card h2 { margin-bottom:18px; font-size:22px; }
-.method-group { display:grid; gap:12px; margin-bottom:18px; }
-.method-group label { display:flex; align-items:center; gap:12px; cursor:pointer; }
-.method-group input[type="radio"] { accent-color:#111; }
-.input-field { width:100%; padding:12px 14px; border-radius:10px; border:1px solid #ddd; outline:none; }
+.input-field { width:100%; padding:12px 14px; border-radius:10px; border:1px solid #ddd; outline:none; margin-bottom:12px; }
 .btn { width:100%; padding:14px 18px; border:none; border-radius:12px; background:#111; color:white; font-size:16px; cursor:pointer; transition:0.3s; }
 .btn:hover { background:#333; }
 .notice { margin-bottom:20px; padding:14px 16px; border-radius:12px; }
 .notice.error { background:#fdecea; color:#b21b2d; }
-.notice.success { background:#e9f9ee; color:#1b6c3f; }
 .empty-state { background:white; padding:40px; border-radius:16px; text-align:center; box-shadow:0 10px 28px rgba(0,0,0,0.05); }
 .empty-state a { margin-top:18px; display:inline-block; text-decoration:none; color:white; background:#111; padding:12px 24px; border-radius:10px; }
-    
-    .back-to-shop{ display:inline-block; background:#111; color:#fff !important; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:600; }
-    .back-to-shop:hover{ opacity:.9 }
-    .btn{ color:#fff !important; }
+.back-to-shop{ display:inline-block; background:#111; color:#fff !important; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:600; }
+.back-to-shop:hover{ opacity:.9 }
+.btn{ color:#fff !important; }
+.checkout-label { display:block; margin-top:12px; margin-bottom:6px; font-weight:600; font-size:14px; }
 </style>
 </head>
 <body>
@@ -284,7 +253,7 @@ body { background:#f8f8f8; color:#1a1a1a; }
                 </thead>
                 <tbody>
                     <?php foreach ($cart_items as $item): ?>
-                        <tr>
+                        <tr class="cart-row" data-id="<?php echo intval($item['id']); ?>" data-price="<?php echo floatval($item['price']); ?>">
                             <td>
                                 <div class="product-name">
                                     <img src="image/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
@@ -296,9 +265,9 @@ body { background:#f8f8f8; color:#1a1a1a; }
                             </td>
                             <td>Tk. <?php echo number_format($item['price'], 2); ?></td>
                             <td>
-                                <input class="qty-input" type="number" name="qty[<?php echo intval($item['id']); ?>]" value="<?php echo intval($item['quantity']); ?>" min="1">
+                                <input class="qty-input" type="number" name="qty[<?php echo intval($item['id']); ?>]" value="<?php echo intval($item['quantity']); ?>" min="1" oninput="updateRowTotals(this)">
                             </td>
-                            <td>Tk. <?php echo number_format($item['subtotal'], 2); ?></td>
+                            <td class="subtotal-cell">Tk. <span><?php echo number_format($item['subtotal'], 2); ?></span></td>
                             <td><a class="action-link" href="cart.php?remove=<?php echo intval($item['id']); ?>">Remove</a></td>
                         </tr>
                     <?php endforeach; ?>
@@ -308,34 +277,36 @@ body { background:#f8f8f8; color:#1a1a1a; }
             <div class="summary">
                 <div class="summary-card">
                     <h3>Order Summary</h3>
-                    <?php foreach ($cart_items as $item): ?>
-                        <div class="summary-item">
-                            <span><?php echo htmlspecialchars($item['name']); ?> x <?php echo intval($item['quantity']); ?></span>
-                            <span>Tk. <?php echo number_format($item['subtotal'], 2); ?></span>
-                        </div>
-                    <?php endforeach; ?>
+                    <div id="summary-items-list">
+                        <?php foreach ($cart_items as $item): ?>
+                            <div class="summary-item" id="summary-item-<?php echo intval($item['id']); ?>">
+                                <span class="summary-item-name"><?php echo htmlspecialchars($item['name']); ?> x <strong class="summary-item-qty"><?php echo intval($item['quantity']); ?></strong></span>
+                                <span class="summary-item-subtotal">Tk. <?php echo number_format($item['subtotal'], 2); ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                     <div class="summary-item total">
                         <span>Total</span>
-                        <span>Tk. <?php echo number_format($total_amount, 2); ?></span>
+                        <span id="grand-total-display">Tk. <?php echo number_format($total_amount, 2); ?></span>
                     </div>
                 </div>
 
                 <div class="checkout-card">
                     <h2>Billing Information</h2>
 
-                    <label class="checkout-label short">Name</label>
+                    <label class="checkout-label">Name</label>
                     <input type="text" name="customer_name" class="input-field" placeholder="Enter your full name" value="<?php echo htmlspecialchars($customer_name); ?>" required>
 
-                    <label class="checkout-label spaced">Phone</label>
+                    <label class="checkout-label">Phone</label>
                     <input type="tel" name="customer_phone" class="input-field" placeholder="Enter your phone number" value="<?php echo htmlspecialchars($customer_phone); ?>" required>
 
-                    <label class="checkout-label spaced">Email</label>
+                    <label class="checkout-label">Email</label>
                     <input type="email" name="customer_email" class="input-field" placeholder="Enter your email address" value="<?php echo htmlspecialchars($customer_email); ?>" required>
 
-                    <label class="checkout-label spaced">Shipping Address</label>
+                    <label class="checkout-label">Shipping Address</label>
                     <textarea name="shipping_address" class="input-field" rows="4" placeholder="Enter your shipping address" required><?php echo htmlspecialchars($shipping_address); ?></textarea>
 
-                    <p class="checkout-note">
+                    <p class="checkout-note" style="margin-bottom:18px;">
                         Payment Method: <strong>Cash on Delivery</strong>
                     </p>
 
@@ -348,5 +319,39 @@ body { background:#f8f8f8; color:#1a1a1a; }
     <?php endif; ?>
 </div>
 
+<script>
+function updateRowTotals(inputElement) {
+    let qty = parseInt(inputElement.value);
+    if (isNaN(qty) || qty < 1) {
+        qty = 1;
+        inputElement.value = 1;
+    }
+
+    const row = inputElement.closest('.cart-row');
+    const id = row.getAttribute('data-id');
+    const price = parseFloat(row.getAttribute('data-price'));
+    const subtotal = price * qty;
+
+    // Update row subtotal display
+    row.querySelector('.subtotal-cell span').textContent = subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+    // Update matching item in Order Summary card
+    const summaryRow = document.getElementById('summary-item-' + id);
+    if (summaryRow) {
+        summaryRow.querySelector('.summary-item-qty').textContent = qty;
+        summaryRow.querySelector('.summary-item-subtotal').textContent = 'Tk. ' + subtotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    // Recalculate Grand Total
+    let grandTotal = 0;
+    document.querySelectorAll('.cart-row').forEach(r => {
+        const itemPrice = parseFloat(r.getAttribute('data-price'));
+        const itemQty = parseInt(r.querySelector('.qty-input').value) || 1;
+        grandTotal += itemPrice * itemQty;
+    });
+
+    document.getElementById('grand-total-display').textContent = 'Tk. ' + grandTotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+}
+</script>
 </body>
 </html>

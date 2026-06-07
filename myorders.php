@@ -7,30 +7,14 @@ if(isset($_SESSION['user_id'])){
 
         $user_id = $_SESSION['user_id'];
 
-        // Check if group_id column exists for grouping support
-        $has_group = false;
-        $col_check = mysqli_query($conn, "SHOW COLUMNS FROM single_order LIKE 'group_id'");
-        if($col_check && mysqli_num_rows($col_check) > 0){
-            $has_group = true;
-        }
-
-        if($has_group){
-            // Show only master orders (product_id = 0 or master ids referenced by group_id)
-            $sql = "SELECT so.*, p.payment_method
-                    FROM single_order so
-                    LEFT JOIN payments p ON p.order_id = so.id
-                    WHERE so.user_id = '$user_id'
-                      AND (so.product_id = 0 OR so.id IN (SELECT DISTINCT group_id FROM single_order WHERE group_id IS NOT NULL AND group_id != 0))
-                    ORDER BY so.id DESC";
-        } else {
-            // Fallback for older schema
-            $sql = "SELECT so.*, p.payment_method
-                    FROM single_order so
-                    LEFT JOIN payments p ON p.order_id = so.id
-                    WHERE so.user_id = '$user_id'
-                    ORDER BY so.id DESC";
-        }
-        $result = mysqli_query($conn,$sql);
+        // Fetch all orders for this user
+        $sql = "SELECT so.*, pay.payment_method
+                FROM single_order so
+                LEFT JOIN payments pay ON pay.order_id = so.id
+                WHERE so.user_id = '$user_id'
+                ORDER BY so.id DESC";
+        
+        $result = mysqli_query($conn, $sql);
 
         if(!$result){
             echo "Error!: {$conn->error}";
@@ -51,7 +35,7 @@ if(isset($_SESSION['user_id'])){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Customer Dashboard</title>
+<title>My Orders - Customer Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -169,8 +153,51 @@ tbody tr:hover{
     text-decoration:underline;
 }
 
+.empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:#666;
+}
 
-    
+.empty-state p{
+    margin-top:10px;
+    margin-bottom:20px;
+}
+
+.empty-state a{
+    display:inline-block;
+    background:#111;
+    color:white;
+    padding:10px 20px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:4px;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+}
+
+.status-pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.status-completed{
+    background:#d4edda;
+    color:#155724;
+}
+
+.status-cancelled{
+    background:#f8d7da;
+    color:#721c24;
+}
+
 </style>
 </head>
 
@@ -196,27 +223,38 @@ tbody tr:hover{
 
                 <h3>My Orders</h3>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Total Amount</th>
-                            <th>Payment Method</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+                <?php if(mysqli_num_rows($result) == 0): ?>
+                    <div class="empty-state">
+                        <p>You haven't placed any orders yet.</p>
+                        <a href="index.php">Continue Shopping</a>
+                    </div>
+                <?php else: ?>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Total Amount</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th>Order Date</th>
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        <?php while($row=mysqli_fetch_assoc($result)){ ?>
-                        <tr>
-                            <td>#<?php echo intval($row['id']); ?></td>
-                            <td>Tk. <?php echo number_format($row['total_amount'], 2); ?></td>
-                            <td><?php echo htmlspecialchars($row['payment_method'] ?? 'Cash on Delivery'); ?></td>
-                            <td><?php echo htmlspecialchars(ucfirst($row['status'] ?? 'pending')); ?></td>
-                        </tr>
-                        <?php } ?> 
-                    </tbody>
-                </table>
+                        <tbody>
+                            <?php while($row = mysqli_fetch_assoc($result)){ 
+                                $status_class = 'status-' . strtolower($row['status']);
+                            ?>
+                            <tr>
+                                <td>#<?php echo intval($row['id']); ?></td>
+                                <td>Tk. <?php echo number_format($row['total_amount'], 2); ?></td>
+                                <td><?php echo htmlspecialchars($row['payment_method'] ?? 'Cash on Delivery'); ?></td>
+                                <td><span class="status-badge <?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($row['status'] ?? 'pending')); ?></span></td>
+                                <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+                            </tr>
+                            <?php } ?> 
+                        </tbody>
+                    </table>
+                <?php endif; ?>
 
             </div>
 
