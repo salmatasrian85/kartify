@@ -5,7 +5,6 @@ $msg = "";
 $showLogin = false;
 
 if(isset($_POST['submit'])){
-    // sanitize inputs to prevent SQL syntax errors (e.g., apostrophes in names)
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
